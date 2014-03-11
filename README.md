@@ -1,4 +1,4 @@
-ECE497
+ECE496
 ======
 
 University of Toronto ECE497 Project Codes
