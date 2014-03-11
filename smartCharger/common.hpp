@@ -30,7 +30,7 @@
     std::cerr << "ERROR: " << __FILE__ << "(" << __LINE__ << ")::" \
          << __func__ << "> " << msg << std::endl
 
-#define ERRORSTRSIZE 128
+#define ERRORSTRSIZE 150
 
 #define GPIO_REC1_PF_ENABLE 60     // P9_12 = GPIO1_28
 #define GPIO_REC1_LD_ENABLE 48     // P9_15 = GPIO1_16

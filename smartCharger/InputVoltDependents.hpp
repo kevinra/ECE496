@@ -24,14 +24,19 @@ public:
   void* run();
 
 private:
+  // Members
 	bool m_isInputVMeterOoS;
   I2CWrapper m_inputVMeterI2C;
-  GPIOWrapper m_fpgaInterruptGPIO = GPIOWrapper(GPIO_FPGAINTERRUPT);
-  GPIOWrapper m_rec1LdEnGPIO = GPIOWrapper(GPIO_REC1_LD_ENABLE);
-  GPIOWrapper m_rec2LdEnGPIO = GPIOWrapper(GPIO_REC2_LD_ENABLE);
-  GPIOWrapper m_rec1PFMGPIO = GPIOWrapper(GPIO_REC1_PFM);
-  GPIOWrapper m_rec2PFMGPIO = GPIOWrapper(GPIO_REC2_PFM);
+  GPIOWrapper m_fpgaInterruptGPIO;
+  GPIOWrapper m_rec1PfEnGPIO;
+  GPIOWrapper m_rec2PfEnGPIO;
+  GPIOWrapper m_rec1LdEnGPIO;
+  GPIOWrapper m_rec2LdEnGPIO;
+  GPIOWrapper m_rec1PFMGPIO;
+  GPIOWrapper m_rec2PFMGPIO;
+  GPIOWrapper m_batRelayGPIO;
 
+  // Methods
   bool isBothLdEnReady();
   int processInputVMeter();
   inputV translateInputV();

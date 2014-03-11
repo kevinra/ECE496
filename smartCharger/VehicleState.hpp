@@ -12,6 +12,7 @@
 
 #include "common.h"
 #include <curl/curl.h>
+#include <time.h>
 
 class VehicleState
 {
@@ -20,13 +21,16 @@ public:
   ~VehicleState();
 
   int init();
-  int getCurDateNStateFile();
+  int getCurDateNStateFile(time_t* pRawTime);
   int extractData();
   bool getIsParked();
   bool getIsErrorPresent();
   bool isDifferentError();
-  int generateErrorStr(char* pDest);
+  void generateErrorStr(char* pDest);
+  void resetTravelledDist();
+  #ifdef DEBUG
   void printExtractedAttribs();
+  #endif
 
 private:
   // "general"
@@ -59,22 +63,21 @@ private:
   bool m_prev_driverFault;
   bool m_driverFault;
 
-  //
-  bool isParked;
-  bool isErrorPresent
-  double travelledDistance;
+  int m_isParked;
+  bool m_isFaultPresent;
+  double m_travelledDist;
 
   // FTP related members
   CURL* m_ftpHandle;
   CURLcode m_res;
-  struct FtpFile outFile;
-  char timeStr[TIMESTRSIZE];
+  struct FtpFile m_outFile;
 
-  void convertStrToBoolean(char* strBoolean);
+  char m_dateNtimeStr[TIMESTRSIZE];
+  time_t m_rawPrevTim;
+
+  bool convertStrToBoolean(char* strBoolean);
   static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream);
-  static void getCurrentTimeStr(char* timeStr);
-
+  static void setCurrentTimeStr();
 };
-
 
 #endif // VEHICLESTATE_HPP

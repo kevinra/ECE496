@@ -15,25 +15,58 @@
 #include "I2CWrapper.hpp"
 #include "GPIOWrapper.hpp"
 
-extern ElecPrice g_pricingInfo;
-
 #define EVSTATEPOLLINGPERIOD_PARKED 300
 #define HEATEROFF_SOCTHRESHOLD 80
 
 enum heaterState
 {
   S0_IDLE = 0,
-  S1_QueriedTemp,
-  S2_GotTemp
-  S3_TempLimitRaised
+  S1_QUERIEDTEMP,
+  S2_GOT_TEMP,
+  S3_TEMPLIMIT_RAISED
 }
 
 
 EVStateDependents::EVStateDependents()
 {
+  m_evState = new VehicleState();
+  m_heaterState = S0_IDLE;
+  m_isHeaterOoS = FALSE;
+  m_isHeaterOn = FALSE;
+  m_tempthrshld1; = 5;
+  m_tempthrshld2; = 10;
+  m_fpgaI2C = new I2CWrapper();
+  m_heaterGPIO = new GPIOWrapper(GPIO_Heater);
+}
 
-};
-EVStateDependents::~EVStateDependents() {};
+EVStateDependents::~EVStateDependents()
+{
+  delete m_evState;
+  delete m_fpgaI2C;
+  delete m_heaterGPIO;
+}
+
+
+int EVStateDependents::init()
+{
+  if ( m_evState.init() )
+  {
+    DBG_ERR_MSG("VehicleState object initialization failed!");
+    return 1;
+  }
+  if ( m_fpgaI2C.init() )
+  {
+    DBG_ERR_MSG("FPGA I2C initialization failed!");
+    return 1;
+  }
+  if ( m_heaterGPIO.init() )
+  {
+    DBG_ERR_MSG("Heater GPIO initialization failed!");
+    return 1;
+  }
+  return 0;
+}
+
 
 void* EVStateDependents::run()
 {
@@ -41,51 +74,48 @@ void* EVStateDependents::run()
   bool isHeaterOn = FALSE;
   int retVal;
 
-  VehicleState evState = VehicleState();
-  retVal = evState.init();
-  if (retVal < 0)
+  VehicleState evState
     
   UserHabit uh = UserHabit();
 
-  // constructor opens file and sets unblocking
-  I2CWrapper fpgaI2C = I2CWrapper();
-  GPIOWrapper heaterGPIO = GPIOWrapper();
-
   while(1)
   {
-    // Also updates g_currentDate
-    evState.getNextract();
-    cv_signal(gettingEVStateDone);
-
-    if ( evState.isErrorPresent() )
+    // If state file is successfully obtained
+    if ( m_evState.getCurDateNStateFile(m_rawCurTime) )
     {
-      if ( evState.isDifferentError() )
+      if ( m_evState.extractData(m_rawCurTime) )
       {
-        char errorStr[ERRORSTRSIZE];
-        evState.generateErrorStr(errorStr);
-        ftphdlr.uploadError(errorStr);
 
       }
+      cv_signal(gettingEVStateDone);
+
+      if ( (m_isFaultFromStateFile = m_evState.getIsFaultPresent()) )
+      {
+        DBG_OUT_MSG("State.json file has fault.")
+        if ( m_evState.isDifferentError() )
+        {
+          char errorStr[ERRORSTRSIZE];
+          m_evState.generateErrorStr(errorStr);
+          ftphdlr.uploadError(errorStr);
+        }
+      }
+
+      fpgaCtrl();
+      heaterCtrl();
+
+      cv_wait(isEveyoneDoneWithEVStateFile)
     }
-    // If currently driving
-    if ( !(isIdle = evState.isCurrentlyParked) )
-    {
-
-    }
-
-
-
-
-    cv_wait(isEveyoneDoneWithEVStateFile)
-    sleep(isIdle * EVSTATEPOLLINGPERIOD_PARKED)
-    
   }
 }
 
-
+// FPGA has timeout mechanism so that it will not send signals to LLCs if it hasn't
+// received any signals for 1 second.
 void EVStateDependents::fpgaCtrl()
 {
-  if ( !g_EVStateNInputVInterface.getShouldFPGAon() || g_EVStateNInputVInterface.getIsChargingHWErr() )
+  if ( !g_EVStateNInputVInterface.getShouldFPGAon() ||
+       m_isFaultFromStateFile ||
+       g_EVStateNInputVInterface.getIsChargingHWOoS()
+     )
   {
     return;
   }
@@ -94,7 +124,7 @@ void EVStateDependents::fpgaCtrl()
   if ( FPGAI2C(InputCurrent) )
   {
     t1t2Interface.setShouldFPGAon(FALSE)
-    t1t2Interface.setIsChargingHWErr(TRUE)
+    t1t2Interface.setIsChargingHWOoS(TRUE)
   }
 }
 
@@ -108,7 +138,7 @@ void EVStateDependents::heaterCtrl()
 
   switch (m_heaterState)
   {
-    case S0:
+    case S0_IDLE:
       DBG_OUT_MSG("HeaterState: S0");
       if ( t1t2Interface.getShouldFPGAon() )
       {
@@ -125,11 +155,11 @@ void EVStateDependents::heaterCtrl()
         }
       }
       break;
-    case S1:
+    case S1_QUERIEDTEMP:
       DBG_OUT_MSG("HeaterState: S1");
       if (t1t4Interface.getIsTempReady())
       {
-        m_lastTempQueryTime = g_currentDate;      
+        m_lastTempQueryTime = g_currentDate;
         m_heaterState = S2;
       }
       else if (! t1t2Interface.getShouldFPGAon() )
@@ -137,7 +167,7 @@ void EVStateDependents::heaterCtrl()
         m_heaterState = S0;
       }
       break;
-    case S2:
+    case S2_GOT_TEMP:
       DBG_OUT_MSG("HeaterState: S2");
       if (! t1t2Interface.getShouldFPGAon() )
       {
@@ -149,7 +179,7 @@ void EVStateDependents::heaterCtrl()
         m_heaterState = S3;
       }
       break;
-    case S3:
+    case S3_TEMPLIMIT_RAISED:
       DBG_OUT_MSG("HeaterState: S3");
       if (! t1t2Interface.getShouldFPGAon() )
       {

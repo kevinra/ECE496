@@ -31,18 +31,7 @@ void* run()
 	    t1t2Interface.setIsErrorFromState(FALSE)
 	  }
 
-		// FPGA
-	  if ( t1t2Interface.getShouldFPGAon() && !t1t2Interface.getIsChargingHWErr() )
-	  {
-	    int inputCurrent = calculateInputCurrent();
-	    if ( FPGAI2C(InputCurrent) )
-	    {
-	    	t1t2Interface.setShouldFPGAon(FALSE)
-	      t1t2Interface.setIsChargingHWErr(TRUE)
-	    }
-	  }
-
-		// Heater Control
+		fpgaCtrl();
     heaterCtrl();
 
 		// Recording user pattern (time when stops charging)
@@ -57,4 +46,23 @@ void* run()
 
 	}
 }
+
+S0: parked, not charging
+S1: parked, charging
+S2: crusing
+
+S0:
+  if (getShouldFPGAon)
+  	record start driving time
+    state = S1
+  else if (! isParked)
+  	state = S2
+
+S1:
+	if (! getShouldFPGAon)
+		state = S0
+S2:
+	if (isParked)
+		record travalled distance
+	  state = S0
 

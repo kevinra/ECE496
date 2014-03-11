@@ -14,8 +14,6 @@
 #include "InputVoltDependents.hpp"
 #include "EVStateNInputVInterface.hpp"
 
-#define NFDS_LDENABLE 3
-#define NFDS_FPGAINTERRUPT 2
 #define INPUTVOLT_120VRANGE_1 
 #define INPUTVOLT_120VRANGE_2 
 #define INPUTVOLT_240VRANGE_1 
@@ -23,17 +21,29 @@
 
 InputVoltDependents::InputVoltDependents()
 {
-  m_isErrorOccurred = FALSE;
-  m_inputVMeterI2C = I2CWrapper();
-  m_fpgaInterruptGPIO = GPIOWrapper(GPIO_FPGAINTERRUPT);
-  m_rec1LdEnGPIO = GPIOWrapper(GPIO_REC1_LD_ENABLE);
-  m_rec2LdEnGPIO = GPIOWrapper(GPIO_REC2_LD_ENABLE);
-  m_rec1PFMGPIO = GPIOWrapper(GPIO_REC1_PFM);
-  m_rec2PFMGPIO = GPIOWrapper(GPIO_REC2_PFM);
+  m_isInputVMeterOoS = FALSE;
+  m_inputVMeterI2C = new I2CWrapper();
+  m_fpgaInterruptGPIO = new GPIOWrapper(GPIO_FPGAINTERRUPT);
+  m_rec1PfEnGPIO = new GPIOWrapper(GPIO_REC1_PF_ENABLE);
+  m_rec2PfEnGPIO = new GPIOWrapper(GPIO_REC2_PF_ENABLE);
+  m_rec1LdEnGPIO = new GPIOWrapper(GPIO_REC1_LD_ENABLE);
+  m_rec2LdEnGPIO = new GPIOWrapper(GPIO_REC2_LD_ENABLE);
+  m_rec1PFMGPIO = new GPIOWrapper(GPIO_REC1_PFM);
+  m_rec2PFMGPIO = new GPIOWrapper(GPIO_REC2_PFM);
+  m_batRelayGPIO = new GPIOWrapper(GPIO_BATRELAY);
 }
 InputVoltDependents::~InputVoltDependents()
 {
   recNBatRelayOff();
+  delete m_inputVMeterI2C;
+  delete m_fpgaInterruptGPIO;
+  delete m_rec1PfEnGPIO;
+  delete m_rec2PfEnGPIO;
+  delete m_rec1LdEnGPIO;
+  delete m_rec2LdEnGPIO;
+  delete m_rec1PFMGPIO;
+  delete m_rec2PFMGPIO;
+  delete m_batRelayGPIO;
 }
 
 int InputVoltDependents::init()
@@ -47,6 +57,18 @@ int InputVoltDependents::init()
   if ( m_fpgaInterruptGPIO.gpioInit(INPUT_PIN, STR_RISING_EDGE, TRUE) )
   {
     DBG_ERR_MSG("FPGA GPIO Initializing failed!");
+    g_errQueue.addErrStr("");
+    return 1;
+  }
+  if ( m_rec1PfEnGPIO.gpioInit(OUTPUT_PIN, NULL, FALSE) )
+  {
+    DBG_ERR_MSG("Rectifier_1 PF_Enable GPIO Initializing failed!");
+    g_errQueue.addErrStr("");
+    return 1;
+  }
+  if ( m_rec2PfEnGPIO.gpioInit(OUTPUT_PIN, NULL, FALSE) )
+  {
+    DBG_ERR_MSG("Rectifier_2 PF_Enable GPIO Initializing failed!");
     g_errQueue.addErrStr("");
     return 1;
   }
@@ -74,16 +96,71 @@ int InputVoltDependents::init()
     g_errQueue.addErrStr("");
     return 1;
   }
+  if ( m_batRelayGPIO.gpioInit(OUTPUT_PIN, NULL, FALSE) )
+  {
+    DBG_ERR_MSG("Battery relay GPIO Initializing failed!");
+    g_errQueue.addErrStr("");
+    return 1;
+  }
   return 0;
 }
 
+
+int InputVoltDependents::recNBatRelayOn()
+{
+  if ( rec1_PF_Enable.gpioSet(HIGH) )
+  {
+    DBG_ERR_MSG("Rectifier_1 PF_Enable GPIO set HIGH failed!");
+    g_errQueue.addErrStr("");
+    return 1;
+  }
+  if ( rec2_PF_Enable.gpioSet(HIGH) )
+  {
+    DBG_ERR_MSG("Rectifier_2 PF_Enable GPIO set HIGH failed!");
+    g_errQueue.addErrStr("");
+    return 1;
+  }
+  if ( batteryRelay.gpioSet(HIGH) )
+  {
+    DBG_ERR_MSG("Battery Relay GPIO set HIGH failed!");
+    g_errQueue.addErrStr("");
+    return 1;
+  }
+  return 0;
+}
+
+
+int InputVoltDependents::recNBatRelayOff()
+{
+  if ( rec1_PF_Enable.gpioSet(LOW) )
+  {
+    DBG_ERR_MSG("Rectifier_1 PF_Enable GPIO set LOW failed!");
+    g_errQueue.addErrStr("");
+    return 1;
+  }
+  if ( rec2_PF_Enable.gpioSet(LOW) )
+  {
+    DBG_ERR_MSG("Rectifier_2 PF_Enable GPIO set LOW failed!");
+    g_errQueue.addErrStr("");
+    return 1;
+  }
+  if ( batteryRelay.gpioSet(LOW) )
+  {
+    DBG_ERR_MSG("Battery Relay GPIO set LOW failed!");
+    g_errQueue.addErrStr("");
+    return 1;
+  }
+  return 0;
+}
+
+
 void* InputVoltDependents::run()
 {
-  while ( !g_EVStateNInputVInterface.getIsChargingHWErr() )
+  while ( !g_EVStateNInputVInterface.getIsChargingHWOoS() )
   {
     if ( isBothLdEnReady() )
     {
-      inputV iv = processInputVMeter();
+      g_EVStateNInputVInterface.setInputVolt( processInputVMeter() );
       g_EVStateNInputVInterface.setShouldFPGAon(TRUE);
       m_fpgaInterruptGPIO.gpioWaitForInterrupt();
 
@@ -95,6 +172,7 @@ void* InputVoltDependents::run()
     }
   }
   DBG_ERR_MSG("Error occurred, so thread(InputVoltDependents) returns!");
+  recNBatRelayOff();
   return NULL;
 }
 
@@ -105,7 +183,7 @@ bool InputVoltDependents::isBothLdEnReady()
   if ( m_rec1LdEnGPIO.gpioGet(&rec1_ldEn) )
   {
     g_errQueue.addErrStr("Reading Rectifier_1 LD_Enable GPIO failed!");
-    g_EVStateNInputVInterface.setIsChargingHWErr(TRUE);
+    g_EVStateNInputVInterface.setIsChargingHWOoS(TRUE);
     return FALSE;
   }
   if (rec1_ldEn == 0)
@@ -113,14 +191,14 @@ bool InputVoltDependents::isBothLdEnReady()
     if ( m_rec1LdEnGPIO.gpioWaitForInterrupt() )
     {
       g_errQueue.addErrStr("Waiting for interrupt on Rectifier_1 LD_Enable GPIO failed!");
-      g_EVStateNInputVInterface.setIsChargingHWErr(TRUE);
+      g_EVStateNInputVInterface.setIsChargingHWOoS(TRUE);
       return FALSE;     
     }
   }
   if ( m_rec2LdEnGPIO.gpioGet(&rec2_ldEn) )
   {
     g_errQueue.addErrStr("Reading Rectifier_2 LD_Enable GPIO failed!");
-    g_EVStateNInputVInterface.setIsChargingHWErr(TRUE);
+    g_EVStateNInputVInterface.setIsChargingHWOoS(TRUE);
     return FALSE;
   }
   if (rec2_ldEn == 0)
@@ -128,7 +206,7 @@ bool InputVoltDependents::isBothLdEnReady()
     if ( m_rec2LdEnGPIO.gpioWaitForInterrupt() )
     {
       g_errQueue.addErrStr("Waiting for interrupt on Rectifier_2 LD_Enable GPIO failed!");
-      g_EVStateNInputVInterface.setIsChargingHWErr(TRUE);
+      g_EVStateNInputVInterface.setIsChargingHWOoS(TRUE);
       return FALSE;
     }
   }
@@ -180,7 +258,7 @@ void InputVoltDependents::handlePFM()
   if ( m_rec1PFMGPIO.gpioGet(&rec1) )
   {
     g_errQueue.addErrStr("Reading Rectifier_1 PFM GPIO failed!");
-    g_EVStateNInputVInterface.setIsChargingHWErr(TRUE);
+    g_EVStateNInputVInterface.setIsChargingHWOoS(TRUE);
     return;
   }
   if (rec1 == 0)
@@ -188,7 +266,7 @@ void InputVoltDependents::handlePFM()
     if ( m_rec2PFMGPIO.gpioGet(&rec2) )
     {
       g_errQueue.addErrStr("Reading Rectifier_2 PFM GPIO failed!");
-      g_EVStateNInputVInterface.setIsChargingHWErr(TRUE);
+      g_EVStateNInputVInterface.setIsChargingHWOoS(TRUE);
       return;
     }
     if (rec2 == 0)
@@ -198,14 +276,14 @@ void InputVoltDependents::handlePFM()
     else
     {
       g_errQueue.addErrStr("FPGA Error Detected!");
-      g_EVStateNInputVInterface.setIsChargingHWErr(TRUE);
+      g_EVStateNInputVInterface.setIsChargingHWOoS(TRUE);
       return;
     }
   }
   else
   {
     g_errQueue.addErrStr("FPGA Error Detected!");
-    g_EVStateNInputVInterface.setIsChargingHWErr(TRUE);
+    g_EVStateNInputVInterface.setIsChargingHWOoS(TRUE);
     return;
   }
   return;

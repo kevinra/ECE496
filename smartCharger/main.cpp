@@ -13,10 +13,25 @@ int main()
 	  return 0;
 	}
 
+  InputVoltDependents ivdThread;
+  EVStateDependents evdThread;
+  if (ivdThread.init() )
+  {
+  	DBG_ERR_MSG("InputVoltDependents thread initialization failed!");
+  	return 0;
+  }
+  if (evdThread.init() )
+  {
+  	DBG_ERR_MSG("EVStateDependents thread initialization failed!");
+  	return 0;
+  }
+
+
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 
-  InputVoltDependents ivThread;
-  ivThread.start();
+	evdThread.start();
+  ivdThread.start();
+
 
 
   if (! g_errQueue.isEmpty() )
@@ -25,5 +40,6 @@ int main()
   }
 
 	curl_global_cleanup();
+	return 0;
 	
 }

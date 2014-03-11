@@ -266,6 +266,7 @@ int GPIOWrapper::gpioWaitForInterrupt()
   int len;
   char* buf[MAX_BUF];
 
+  memset((void*)fdset, 0, nfds * sizeof(fdset));
   fdset[0].fd = STDIN_FILENO;
   fdset[0].events = POLLIN;
   fdset[1].fd = m_fd;

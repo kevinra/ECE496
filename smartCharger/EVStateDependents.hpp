@@ -10,6 +10,7 @@
 #ifndef EVSTATEDEPENDENTS_HPP
 #define EVSTATEDEPENDENTS_HPP
 
+#include <time.h>
 #include "common.hpp"
 #include "thread/Thread.hpp"
 
@@ -27,20 +28,26 @@ public:
   void* run();
 
 private:
+  // Members
   VehicleState m_evState;
-
-  m_nextDrivingTime;
   heaterState m_heaterState;
   bool m_isHeaterOoS;
   bool m_isHeaterOn;
-  int m_tempthrshld1 = 5;
-  int m_tempthrshld2 = 10;
-  GPIOWrapper m_heaterGPIO
+  bool m_isFaultFromStateFile;
+  int m_tempthrshld1;
+  int m_tempthrshld2;
+  I2CWrapper m_fpgaI2C;
+  GPIOWrapper m_heaterGPIO;
 
+  m_nextDrivingTime;
+  time_t m_rawCurTime;
+  time_t m_lastTempQueryTime;
+
+
+  // methods
   void fpgaCtrl();
   void heaterCtrl();
   void setTempLvl(int isPreHeat);
 };
-
 
 #endif // EVSTATEDEPENDENTS_HPP
