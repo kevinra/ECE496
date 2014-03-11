@@ -26,13 +26,23 @@ enum heaterState
   S3_TEMPLIMIT_RAISED
 }
 
+enum vclmvmState
+{
+  S0_PARKED_NOT_CHARGING = 0,
+  S1_PARKED_CHARGING,
+  S2_CRUSING,
+}
+
 
 EVStateDependents::EVStateDependents()
 {
   m_evState = new VehicleState();
+  m_vmState = S0_PARKED_NOT_CHARGING;
+  m_vmRecordID = 0;
   m_heaterState = S0_IDLE;
   m_isHeaterOoS = FALSE;
   m_isHeaterOn = FALSE;
+  m_isFaultFromStateFile = FALSE;
   m_tempthrshld1; = 5;
   m_tempthrshld2; = 10;
   m_fpgaI2C = new I2CWrapper();
@@ -85,28 +95,71 @@ void* EVStateDependents::run()
     {
       if ( m_evState.extractData(m_rawCurTime) )
       {
+        cv_signal(gettingEVStateDone);
 
-      }
-      cv_signal(gettingEVStateDone);
-
-      if ( (m_isFaultFromStateFile = m_evState.getIsFaultPresent()) )
-      {
-        DBG_OUT_MSG("State.json file has fault.")
-        if ( m_evState.isDifferentError() )
+        if ( ( m_isFaultFromStateFile = m_evState.getIsFaultPresent() ) )
         {
-          char errorStr[ERRORSTRSIZE];
-          m_evState.generateErrorStr(errorStr);
-          ftphdlr.uploadError(errorStr);
+          DBG_OUT_MSG("State.json file has fault.")
+          if ( m_evState.isDifferentError() )
+          {
+            char errorStr[ERRORSTRSIZE];
+            m_evState.generateErrorStr(errorStr);
+            g_errQueue.addErrStr(errorStr);
+          }
         }
+        vclmvmRecordHandle();
+        fpgaCtrl();
+        heaterCtrl();
+
+        cv_wait(isEveyoneDoneWithEVStateFile)
       }
-
-      fpgaCtrl();
-      heaterCtrl();
-
-      cv_wait(isEveyoneDoneWithEVStateFile)
     }
   }
 }
+
+
+void vclmvmRecordHandle()
+{
+  // FSM logic
+  switch (m_vmState)
+  {
+    case S0_PARKED_NOT_CHARGING:
+      DBG_OUT_MSG("VM Record State: S0_PARKED_NOT_CHARGING");
+      if (g_EVStateNInputVInterface.getShouldFPGAon() )
+      {
+        m_vmState = S1_PARKED_CHARGING;
+      }
+      else if ( !m_evState.getIsParked() )
+      {
+        struct rm* timeInfo = localtime(&m_rawCurTime);
+        // Record current time into BBB DB
+        m_vmRecordID = 
+        m_vmState = S2_CRUSING;
+      }
+      break;
+    case S1_PARKED_CHARGING:
+      DBG_OUT_MSG("VM Record State: S1_PARKED_CHARGING");
+      if ( !g_EVStateNInputVInterface.getShouldFPGAon() || m_isFaultFromStateFile)
+      {
+        m_vmState = S1_PARKED_CHARGING;
+      }
+      break;
+    case S2_CRUSING:
+      DBG_OUT_MSG("VM Record State: S2_CRUSING");
+      if ( g_EVStateNInputVInterface.getIsParked() )
+      {
+        double td = m_evState.getTravelledDist();
+        // update a tuple with m_vmRecordID with td
+        m_evState.resetTravelledDist();
+        m_vmState = S0_PARKED_NOT_CHARGING;
+      }
+      break;
+
+    default:
+      DBG_ERR_MSG("Unknown VM Record State");
+  }
+}
+
 
 // FPGA has timeout mechanism so that it will not send signals to LLCs if it hasn't
 // received any signals for 1 second.
@@ -123,8 +176,7 @@ void EVStateDependents::fpgaCtrl()
   int inputCurrent = calculateInputCurrent();
   if ( FPGAI2C(InputCurrent) )
   {
-    t1t2Interface.setShouldFPGAon(FALSE)
-    t1t2Interface.setIsChargingHWOoS(TRUE)
+    g_EVStateNInputVInterface.setIsChargingHWOoS(TRUE)
   }
 }
 
@@ -136,11 +188,12 @@ void EVStateDependents::heaterCtrl()
     return;
   }
 
+  // FSM logic
   switch (m_heaterState)
   {
     case S0_IDLE:
       DBG_OUT_MSG("HeaterState: S0");
-      if ( t1t2Interface.getShouldFPGAon() )
+      if ( g_EVStateNInputVInterface.getShouldFPGAon() )
       {
         // If temperature data is outdated
         if (g_currentDate - m_lastTempQueryTime > TEMPQUERYINTERVAL)
@@ -162,14 +215,14 @@ void EVStateDependents::heaterCtrl()
         m_lastTempQueryTime = g_currentDate;
         m_heaterState = S2;
       }
-      else if (! t1t2Interface.getShouldFPGAon() )
+      else if (! g_EVStateNInputVInterface.getShouldFPGAon() )
       {
         m_heaterState = S0;
       }
       break;
     case S2_GOT_TEMP:
       DBG_OUT_MSG("HeaterState: S2");
-      if (! t1t2Interface.getShouldFPGAon() )
+      if (! g_EVStateNInputVInterface.getShouldFPGAon() )
       {
         m_heaterState = S0;
       }
@@ -181,7 +234,7 @@ void EVStateDependents::heaterCtrl()
       break;
     case S3_TEMPLIMIT_RAISED:
       DBG_OUT_MSG("HeaterState: S3");
-      if (! t1t2Interface.getShouldFPGAon() )
+      if (! g_EVStateNInputVInterface.getShouldFPGAon() )
       {
         setTempLevel(NORMAL);
         m_heaterState = S0;
@@ -192,7 +245,7 @@ void EVStateDependents::heaterCtrl()
       DBG_ERR_MSG("Unknown heater State!");
   }
 
-  if ( t1t2Interface.getShouldFPGAon() ) // charging mode
+  if ( g_EVStateNInputVInterface.getShouldFPGAon() ) // charging mode
   {
     if ( !m_isHeaterOn && m_evState.getMinTemp() < TEMPTHRSHLD_1 )
     {

@@ -53,16 +53,17 @@ S2: crusing
 
 S0:
   if (getShouldFPGAon)
-  	record start driving time
     state = S1
   else if (! isParked)
+  	record start driving time
   	state = S2
 
 S1:
-	if (! getShouldFPGAon)
+	if (! getShouldFPGAon || fault from state file)
 		state = S0
 S2:
 	if (isParked)
 		record travalled distance
+		reset travalled distance
 	  state = S0
 

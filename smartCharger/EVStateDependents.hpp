@@ -30,6 +30,8 @@ public:
 private:
   // Members
   VehicleState m_evState;
+  vclmvmState m_vmState;
+  int m_vmRecordID;
   heaterState m_heaterState;
   bool m_isHeaterOoS;
   bool m_isHeaterOn;
@@ -45,6 +47,7 @@ private:
 
 
   // methods
+  void vclmvmRecordHandle();
   void fpgaCtrl();
   void heaterCtrl();
   void setTempLvl(int isPreHeat);

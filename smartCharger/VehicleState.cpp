@@ -273,7 +273,7 @@ int VehicleState::extractData()
 
   fclose(stateFile);
 
-  if (m_speedCur == 0 && m_pBrake == TRUE && m_gearPos == GEARPOS_NEUTRAL && m_accelPos == 0)
+  if (m_pBrake == TRUE && m_speedCur == 0 && m_gearPos == GEARPOS_NEUTRAL && m_accelPos == 0)
   {
     DBG_OUT_MSG("Vehicle is currently parked.");
     m_isParked = TRUE;
@@ -295,7 +295,7 @@ int VehicleState::extractData()
   }
 
   // Trapezoid area formula. Note that speed is in the unit of km/h
-  travelledDist += (m_speedOld + m_speedCur) * difftime() / 7200
+  m_travelledDist += (m_speedOld + m_speedCur) * difftime() / 7200
   return 0;
 }
 
@@ -340,6 +340,12 @@ bool VehicleState::getIsFaultPresent()
 }
 
 
+double VehicleState::getTravelledDist()
+{
+  return m_travelledDist;
+}
+
+
 bool VehicleState::isDifferentError()
 {
   if (m_prev_faultMap != m_faultMap)
@@ -374,6 +380,12 @@ void VehicleState::generateErrorStr(char* pDest)
     strncat(errStr, "Drive fault is reported!\n", 30);
   }
   return;
+}
+
+
+void VehicleState::resetTravelledDist()
+{
+  m_travelledDist = 0;
 }
 
 

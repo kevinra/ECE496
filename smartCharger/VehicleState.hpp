@@ -23,14 +23,15 @@ public:
   int init();
   int getCurDateNStateFile(time_t* pRawTime);
   int extractData();
-  bool getIsParked();
-  bool getIsErrorPresent();
-  bool isDifferentError();
-  void generateErrorStr(char* pDest);
-  void resetTravelledDist();
   #ifdef DEBUG
   void printExtractedAttribs();
   #endif
+  bool getIsParked();
+  bool getIsFaultPresent();
+  double getTravelledDist();
+  bool isDifferentError();
+  void generateErrorStr(char* pDest);
+  void resetTravelledDist();
 
 private:
   // "general"
