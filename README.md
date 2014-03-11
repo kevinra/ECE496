@@ -1,7 +1,7 @@
 ECE496
 ======
 
-University of Toronto ECE497 Project Codes
+University of Toronto ECE496 Project Codes
 
 include codes for:
 
