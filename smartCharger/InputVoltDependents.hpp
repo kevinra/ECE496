@@ -26,15 +26,15 @@ public:
 private:
   // Members
 	bool m_isInputVMeterOoS;
-  I2CWrapper m_inputVMeterI2C;
-  GPIOWrapper m_fpgaInterruptGPIO;
-  GPIOWrapper m_rec1PfEnGPIO;
-  GPIOWrapper m_rec2PfEnGPIO;
-  GPIOWrapper m_rec1LdEnGPIO;
-  GPIOWrapper m_rec2LdEnGPIO;
-  GPIOWrapper m_rec1PFMGPIO;
-  GPIOWrapper m_rec2PFMGPIO;
-  GPIOWrapper m_batRelayGPIO;
+  I2CWrapper* m_pI2C_inputVMeter;
+  GPIOWrapper* m_pGPIO_fpgaInterrupt;
+  GPIOWrapper* m_pGPIO_rec1PfEn;
+  GPIOWrapper* m_pGPIO_rec2PfEn;
+  GPIOWrapper* m_pGPIO_rec1LdEn;
+  GPIOWrapper* m_pGPIO_rec2LdEn;
+  GPIOWrapper* m_pGPIO_rec1PFM;
+  GPIOWrapper* m_pGPIO_rec2PFM;
+  GPIOWrapper* m_pGPIO_batRelay;
 
   // Methods
   bool isBothLdEnReady();

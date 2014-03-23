@@ -12,7 +12,10 @@
 
 #include "common.h"
 #include <curl/curl.h>
-#include <time.h>
+#include <chrono>
+#include <ctime>
+
+typedef std::chrono::system_clock::time_point chronoTP;
 
 class VehicleState
 {
@@ -28,21 +31,22 @@ public:
   #endif
   bool getIsParked();
   bool getIsFaultPresent();
-  double getTravelledDist();
+  bool getIsSoCDecreased();
+  float getTravelledDist();
+  char* getStateFileName();
   bool isDifferentError();
   void generateErrorStr(char* pDest);
   void resetTravelledDist();
 
 private:
   // "general"
-  double m_speedOld;
-  double m_speedCur;
+  float m_speedOld;
+  float m_speedCur;
   bool m_eStop;
   bool m_pBrake;
 
   // "battery"
-  int m_socOld;
-  int m_socCur;
+  int m_soc;
   int m_vCellMin;
   int m_vCellMax;
   int m_current;
@@ -64,17 +68,18 @@ private:
   bool m_prev_driverFault;
   bool m_driverFault;
 
-  int m_isParked;
+  bool m_isParked;
   bool m_isFaultPresent;
-  double m_travelledDist;
+  bool m_isSoCDecreased;
+  float m_travelledDist; // in meters
 
   // FTP related members
   CURL* m_ftpHandle;
-  CURLcode m_res;
   struct FtpFile m_outFile;
 
-  char m_dateNtimeStr[TIMESTRSIZE];
-  time_t m_rawPrevTim;
+  char m_dateNtimeStr[STATEFILE_STRSIZE];
+  float m_timeDiff;
+  chronoTP m_tp_PrevTime;
 
   bool convertStrToBoolean(char* strBoolean);
   static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream);

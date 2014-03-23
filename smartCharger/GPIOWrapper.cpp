@@ -58,7 +58,7 @@ void GPIOWrapper::setGPIONum(int gpioNum)
 }
 
 
-int GPIOWrapper::gpioInit(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking)
+int GPIOWrapper::init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking)
 {
   int fd, len, retVal;
   char buf[MAX_BUF];

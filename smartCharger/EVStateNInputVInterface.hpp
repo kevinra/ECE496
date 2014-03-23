@@ -13,8 +13,6 @@
 #include "GPIOWrapper.hpp"
 #include <pthread.h>
 
-#define TIMESTRSIZE 30
-
 extern EVStateNInputVInterface g_EVStateNInputVInterface;
 
 enum inputV
@@ -24,7 +22,7 @@ enum inputV
   inputV_240V
 }
 
-class EVStateNInputVInterface: public Thread
+class EVStateNInputVInterface
 {
 public:
   EVStateNInputVInterface();
@@ -32,7 +30,7 @@ public:
 
   int init();
   int getInputVolt();
-  void setInputVolt(int inputV);
+  void setInputVolt(inputV iv);
   bool getIsChargingHWOoS();
   void setIsChargingHWOoS(bool isOoS);
   bool getShouldFPGAOn();

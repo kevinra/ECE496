@@ -38,7 +38,7 @@ public:
   ~GPIOWrapper();
 
   void setGPIONum(int gpioNum);
-  int gpioInit(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking);
+  int init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking);
   int gpioSet(PIN_VALUE val);
   int gpioGet(int* pValue);
   int gpioWaitForInterrupt();

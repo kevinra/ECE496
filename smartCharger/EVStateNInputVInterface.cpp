@@ -9,8 +9,6 @@
 
 #include "EVStateNInputVInterface.hpp"
 
-#define TIMEOUTCOUNTERLIMIT 1000
-
 // global object
 EVStateNInputVInterface g_EVStateNInputVInterface;
 
@@ -27,9 +25,9 @@ EVStateNInputVInterface::EVStateNInputVInterface()
 
 EVStateNInputVInterface::~EVStateNInputVInterface();
 {
-  pthread_mutex_destroy(&m_inputVoltMtx, NULL);
-  pthread_mutex_destroy(&m_isChargingHWOoSMtx, NULL);
-  pthread_mutex_destroy(&m_shouldFPGAOnMtx, NULL);
+  pthread_mutex_destroy(&m_inputVoltMtx);
+  pthread_mutex_destroy(&m_isChargingHWOoSMtx);
+  pthread_mutex_destroy(&m_shouldFPGAOnMtx);
 }
 
 

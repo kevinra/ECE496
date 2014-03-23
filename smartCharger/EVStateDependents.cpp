@@ -8,110 +8,102 @@
 */
 
 // <T1>
-
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <sqlite3.h> 
 #include "EVStateDependents.hpp"
 #include "EVStateNInputVInterface.hpp"
+#include "EVStateNUploaderInterface.hpp"
 #include "VehicleState.hpp"
 #include "I2CWrapper.hpp"
-#include "GPIOWrapper.hpp"
+// #include "GPIOWrapper.hpp"
 
+// #define TEMP_1 5
+// #define TEMP_2 10
+// #define HEATEROFF_SOCTHRESHOLD 80
 #define EVSTATEPOLLINGPERIOD_PARKED 300
-#define HEATEROFF_SOCTHRESHOLD 80
-
-enum heaterState
-{
-  S0_IDLE = 0,
-  S1_QUERIEDTEMP,
-  S2_GOT_TEMP,
-  S3_TEMPLIMIT_RAISED
-}
-
-enum vclmvmState
-{
-  S0_PARKED_NOT_CHARGING = 0,
-  S1_PARKED_CHARGING,
-  S2_CRUSING,
-}
+#define DISTPERSOC_INIT 20
+#define ALPHA 0.875
+#define BINARYLOCATION_MOVE "/bin/mv"
+#define DBNAME "sm.db"
+#define ROUNDINGTHRSHD 4 
 
 
 EVStateDependents::EVStateDependents()
 {
-  m_evState = new VehicleState();
+  m_pVS_evState = new VehicleState();
   m_vmState = S0_PARKED_NOT_CHARGING;
-  m_vmRecordID = 0;
-  m_heaterState = S0_IDLE;
-  m_isHeaterOoS = FALSE;
-  m_isHeaterOn = FALSE;
+  m_vmRowID = 0;
+  m_lastTravelledDist = 0;
+  m_distPerSoc = DISTPERSOC_INIT;
   m_isFaultFromStateFile = FALSE;
-  m_tempthrshld1; = 5;
-  m_tempthrshld2; = 10;
-  m_fpgaI2C = new I2CWrapper();
-  m_heaterGPIO = new GPIOWrapper(GPIO_Heater);
+  m_pI2C_fpga = new I2CWrapper();
+  // m_heaterState = S0_IDLE;
+  // m_isHeaterOoS = FALSE;
+  // m_isHeaterOn = FALSE;
+  // m_tempthrshld1; = TEMP_1;
+  // m_tempthrshld2; = TEMP_2;
+  // m_pGPIO_heater = new GPIOWrapper(GPIO_Heater);
 }
 
 EVStateDependents::~EVStateDependents()
 {
-  delete m_evState;
-  delete m_fpgaI2C;
-  delete m_heaterGPIO;
+  delete m_pVS_evState;
+  delete m_pI2C_fpga;
+  // delete m_pGPIO_heater;
 }
 
 
 int EVStateDependents::init()
 {
-  if ( m_evState.init() )
+  if ( g_EVStateNInputVInterface.init() )
+  {
+    DBG_ERR_MSG("Global object for evState and inputV interface failed!");
+    return 1;
+  }
+  if ( m_pVS_evState->init() )
   {
     DBG_ERR_MSG("VehicleState object initialization failed!");
     return 1;
   }
-  if ( m_fpgaI2C.init() )
+  if ( m_pI2C_fpga->init() )
   {
     DBG_ERR_MSG("FPGA I2C initialization failed!");
     return 1;
   }
-  if ( m_heaterGPIO.init() )
-  {
-    DBG_ERR_MSG("Heater GPIO initialization failed!");
-    return 1;
-  }
+  // if ( m_pGPIO_heater->init() )
+  // {
+  //   DBG_ERR_MSG("Heater GPIO initialization failed!");
+  //   return 1;
+  // }
   return 0;
 }
 
 
 void* EVStateDependents::run()
 {
-  bool isIdle = TRUE;
-  bool isHeaterOn = FALSE;
-  int retVal;
-
-  VehicleState evState
-    
-  UserHabit uh = UserHabit();
-
   while(1)
   {
     // If state file is successfully obtained
-    if ( m_evState.getCurDateNStateFile(m_rawCurTime) )
+    if ( !m_pVS_evState->getCurDateNStateFile(m_tp_curTime) )
     {
-      if ( m_evState.extractData(m_rawCurTime) )
+      if ( !m_pVS_evState->extractData(m_tp_curTime) )
       {
-        cv_signal(gettingEVStateDone);
-
-        if ( ( m_isFaultFromStateFile = m_evState.getIsFaultPresent() ) )
+        if ( ( m_isFaultFromStateFile = m_pVS_evState->getIsFaultPresent() ) )
         {
           DBG_OUT_MSG("State.json file has fault.")
-          if ( m_evState.isDifferentError() )
+          if ( m_pVS_evState->isDifferentError() )
           {
             char errorStr[ERRORSTRSIZE];
-            m_evState.generateErrorStr(errorStr);
+            m_pVS_evState->generateErrorStr(errorStr);
             g_errQueue.addErrStr(errorStr);
           }
         }
         vclmvmRecordHandle();
         fpgaCtrl();
-        heaterCtrl();
-
-        cv_wait(isEveyoneDoneWithEVStateFile)
+        // heaterCtrl();
+        piggybackInfoNRenameFileWithVclMvm();
       }
     }
   }
@@ -129,12 +121,12 @@ void vclmvmRecordHandle()
       {
         m_vmState = S1_PARKED_CHARGING;
       }
-      else if ( !m_evState.getIsParked() )
+      else if ( !m_pVS_evState->getIsParked() )
       {
-        struct rm* timeInfo = localtime(&m_rawCurTime);
         // Record current time into BBB DB
-        m_vmRecordID = 
+        m_vmRowID = sqlFindCorrespRowID();
         m_vmState = S2_CRUSING;
+        m_lastTravelledDist = 0;
       }
       break;
     case S1_PARKED_CHARGING:
@@ -146,18 +138,34 @@ void vclmvmRecordHandle()
       break;
     case S2_CRUSING:
       DBG_OUT_MSG("VM Record State: S2_CRUSING");
-      if ( g_EVStateNInputVInterface.getIsParked() )
+      if ( m_pVS_evState->getIsSoCDecreased() )
       {
-        double td = m_evState.getTravelledDist();
-        // update a tuple with m_vmRecordID with td
-        m_evState.resetTravelledDist();
+        // Instead of calculating average, it uses how TCP calculates timeout period.
+        // There is room for improvement, of course.
+        float curTotalDist = m_pVS_evState->getTravelledDist();
+        m_distPerSoc = ALPHA * m_distPerSoc + (1 - ALPHA) * (curTotalDist - m_lastTravelledDist);
+        m_lastTravelledDist = curTotalDist;
+        DBG_OUT_MSG("SOC decreased. m_distPerSoc is updated to " << m_distPerSoc);
+      }
+      if ( m_pVS_evState.getIsParked() )
+      {
+        // If rowID obtained is zero, it means that the program failed
+        // to obtain a tuple that matches criteria
+        if (m_vmRowID)
+        {
+          float td = m_pVS_evState->getTravelledDist();
+          sqlUpdateCorrespRowID(td);
+        }
+        m_pVS_evState->resetTravelledDist();
         m_vmState = S0_PARKED_NOT_CHARGING;
+        DBG_OUT_MSG("Total distance travelled for this trip: " << td);
       }
       break;
 
     default:
       DBG_ERR_MSG("Unknown VM Record State");
   }
+  return;
 }
 
 
@@ -181,6 +189,125 @@ void EVStateDependents::fpgaCtrl()
 }
 
 
+void piggybackInfoNRenameFileWithVclMvm()
+{
+  // Piggyback derived information into state file.
+  char origFilePath[STATEFILE_FULLPATHSIZE];
+  char newFilePath[STATEFILE_FULLPATHSIZE];
+  char* origStateFileName = m_pVS_evState.getStateFileName();
+  snprintf(origFilePath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", origStateFileName);
+
+  std::ofstream fs;
+  fs.open(origFilePath, std::ios::out | std::ios::app);
+  fs << "\n\"travelledDistance\": " << m_pVS_evState.getTravelledDist() << ",\n";
+  fs << "\n\"distancePerSoC\": " << m_distPerSoc << "\n\n";
+  fs.close();
+
+  // Rename the file
+  if (m_vmState == S0_PARKED_NOT_CHARGING)
+  {
+    snprintf(newFilePath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "S0_%s", origStateFileName);
+  }
+  else if (m_vmState == S1_PARKED_CHARGING)
+  {
+    snprintf(newFilePath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "S1_%s", origStateFileName);
+  }
+  else if (m_vmState == S2_CRUSING)
+  {
+    snprintf(newFilePath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "S2_%s", origStateFileName);
+  }
+  #ifdef DEBUG
+  if ( exec(BINARYLOCATION_MOVE, BINARYLOCATION_MOVE, origFilePath, newFilePath, NULL) )
+  {
+    ERR_MSG("Renaming " << origFilePath << " to " << newFilePath << " failed!");
+  }
+  #else
+  exec(BINARYLOCATION_MOVE, BINARYLOCATION_MOVE, origFilePath, newFilePath, NULL);
+  #endif
+
+  return;
+}
+
+
+// Note that if no match is found on the database, it would
+// return 0, which is actually an error this is case.
+int EVStateDependents::sqlFindCorrespRowID()
+{
+  sqlite3 *db;
+  char *zErrMsg = 0;
+  int rowID = 0;
+
+  using std::chrono;
+  struct std::tm* pTimeInfo = std::localtime( system_clock::to_time_t(m_tp_curTime) );
+
+  // Open database
+  if( sqlite3_open(DBNAME, &db) )
+  {
+    DBG_ERR_MSG("Can't open database! SQLite3 said: " << sqlite3_errmsg(db));
+    return rowID;
+  }
+
+  // Round the minute to nearest 10 (current granularity of the DB)
+  int roundedMin = pTimeInfo->tm_min;
+  if (roundedMin % 10 > ROUNDINGTHRSHD)
+  {
+    roundedMin = (roundedMin + 10) / 10 * 10;
+  }
+  else
+  {
+    roundedMin = roundedMin / 10 * 10;
+  }
+
+  char sql[STATEFILE_FULLPATHSIZE];
+  snprintf(sql, STATEFILE_FULLPATHSIZE,
+           "SELECT rowID FROM dc WHERE day=%d AND starthour=%d AND startmin=%d",
+           pTimeInfo->tm_wday, pTimeInfo->tm_hour, roundedMin);
+
+  if( sqlite3_exec(db, sql, selectCallback, (void*)&rowID, &zErrMsg) != SQLITE_OK )
+  {
+    DBG_ERR_MSG("SQL SELECT error! SQLite3 said: " << zErrMsg);
+    sqlite3_free(zErrMsg);
+  }
+  sqlite3_close(db);
+  DBG_OUT_MSG("returning rowID = " << rowID);
+  return rowID;
+}
+
+
+static int selectCallback(void* data, int argc, char **argv, char **azColName)
+{
+   *(int*)data = atoi(argv[0]);
+   return 0;
+}
+
+
+void EVStateDependents::sqlUpdateCorrespRowID(float td)
+{
+  sqlite3 *db;
+  char *zErrMsg = 0;
+
+  // Open database
+  if( sqlite3_open(DBNAME, &db) )
+  {
+    DBG_ERR_MSG("Can't open database! SQLite3 said: " << sqlite3_errmsg(db));
+    return;
+  }
+  char sql[STATEFILE_FULLPATHSIZE];
+  snprintf(sql, STATEFILE_FULLPATHSIZE,
+           "UPDATE dc SET distance=%f WHERE rowID=%d",
+           td, m_vmRowID);
+
+  if( sqlite3_exec(db, sql, NULL, NULL, &zErrMsg) != SQLITE_OK )
+  {
+    DBG_ERR_MSG("SQL UPDATE error! SQLite3 said: " << zErrMsg);
+    sqlite3_free(zErrMsg);
+  }
+  sqlite3_close(db);
+  return;
+}
+
+
+/*
 void EVStateDependents::heaterCtrl()
 {
   if (m_isHeaterOoS)
@@ -247,9 +374,9 @@ void EVStateDependents::heaterCtrl()
 
   if ( g_EVStateNInputVInterface.getShouldFPGAon() ) // charging mode
   {
-    if ( !m_isHeaterOn && m_evState.getMinTemp() < TEMPTHRSHLD_1 )
+    if ( !m_isHeaterOn && m_pVS_evState->getMinTemp() < TEMPTHRSHLD_1 )
     {
-      if ( m_heaterGPIO.gpioSet(HIGH) )
+      if ( m_pGPIO_heater->gpioSet(HIGH) )
       {
         DBG_ERR_MSG("Heater GPIO set(HIGH) failed!");
         m_isHeaterOoS = TRUE;
@@ -261,9 +388,9 @@ void EVStateDependents::heaterCtrl()
       }
 
     } // Else if the heater is on and it is above the second threshold value
-    else if ( m_isHeaterOn && m_evState.getMinTemp() > TEMPTHRSHLD_2 )
+    else if ( m_isHeaterOn && m_pVS_evState->getMinTemp() > TEMPTHRSHLD_2 )
     {
-      if ( m_heaterGPIO.gpioSet(LOW) )
+      if ( m_pGPIO_heater->gpioSet(LOW) )
       {
         DBG_ERR_MSG("Heater GPIO set(LOW) failed!");
         m_isHeaterOoS = TRUE;
@@ -289,3 +416,6 @@ void setTempLevel(int isPreHeat)
   tempThreshold2 = baseTemp + PREHEATINGTEMPADJUSTMENT * isPreHeat;
   return;
 }
+
+*/
+

@@ -10,13 +10,28 @@
 #ifndef EVSTATEDEPENDENTS_HPP
 #define EVSTATEDEPENDENTS_HPP
 
-#include <time.h>
+#include "VehicleState.hpp"
 #include "common.hpp"
 #include "thread/Thread.hpp"
 
-#define NORMAL 0
-#define PREHEAT 1
-#define PREHEATINGTEMPADJUSTMENT
+// #define NORMAL 0
+// #define PREHEAT 1
+// #define PREHEATINGTEMPADJUSTMENT
+
+// enum heaterState
+// {
+//   S0_IDLE = 0,
+//   S1_QUERIEDTEMP,
+//   S2_GOT_TEMP,
+//   S3_TEMPLIMIT_RAISED
+// }
+
+enum vclMvmState
+{
+  S0_PARKED_NOT_CHARGING = 0,
+  S1_PARKED_CHARGING,
+  S2_CRUSING,
+}
 
 
 class EVStateDependents: public Thread
@@ -29,28 +44,35 @@ public:
 
 private:
   // Members
-  VehicleState m_evState;
-  vclmvmState m_vmState;
-  int m_vmRecordID;
-  heaterState m_heaterState;
-  bool m_isHeaterOoS;
-  bool m_isHeaterOn;
+  VehicleState* m_pVS_evState;
+  vclMvmState m_vmState;
+  int m_vmRowID;
+  float m_lastTravelledDist;
+  float m_distPerSoC;
   bool m_isFaultFromStateFile;
-  int m_tempthrshld1;
-  int m_tempthrshld2;
-  I2CWrapper m_fpgaI2C;
-  GPIOWrapper m_heaterGPIO;
+  I2CWrapper* m_pI2C_fpga;
+  // GPIOWrapper* m_pGPIO_heater;
+  // heaterState m_heaterState;
+  // bool m_isHeaterOoS;
+  // bool m_isHeaterOn;
+  // int m_tempthrshld1;
+  // int m_tempthrshld2;
 
   m_nextDrivingTime;
-  time_t m_rawCurTime;
-  time_t m_lastTempQueryTime;
+  chronoTP m_tp_curTime;
+  // time_t m_lastTempQueryTime;
 
 
   // methods
   void vclmvmRecordHandle();
   void fpgaCtrl();
+  void piggybackInfoNRenameFileWithVclMvm();
+  int sqlFindCorrespRowID();
+  void sqlUpdateCorrepRowID(float td);
+  /*
   void heaterCtrl();
   void setTempLvl(int isPreHeat);
+  */
 };
 
 #endif // EVSTATEDEPENDENTS_HPP

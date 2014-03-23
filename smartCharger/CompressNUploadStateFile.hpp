@@ -19,11 +19,17 @@ class CompressNUploadStateFile: public Thread
 public:
   CompressNUploadStateFile();
   ~CompressNUploadStateFile();
+  int init();
   void* run();
 
 private:
-  CURL* curl;
+  CURL* m_curl;
+  unsigned int m_num7ZipCreated;
+  unsigned int m_numFileAdded;
 
+  is7zFile(char fileName[])
+  compressNUploadGroup(char fileListStr[]);
+  upload7zFile(char 7zName[])
 };
 
 #endif // COMPRESSNUPLOADSTATEFILE_HPP

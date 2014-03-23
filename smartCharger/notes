@@ -7,10 +7,6 @@ to be determined (for single LLC, is there difference in output current for diff
 Q. How to shutdown LLCs?
 A. Implement timeout on FPGA so that if no master-write for certain period, just turn LLCs off
 
-Q. How to learn user behavior? How should we log user driving time (in terms of data structure)?
-<start driving hour> <accul_counter> <user schedule> <distance travelled (avg)>
-
-
 Q. How to calculate input current for batteries?
 
 
@@ -21,6 +17,17 @@ Charging
 Discharging
 
 
+
 2 threads using different GPIO -> OK
 2 threads using same GPIO or interface (I2C, SPI etc) -> NO (need synchronization)
 http://www.raspberrypi.org/phpBB3/viewtopic.php?t=7608&p=95943
+
+Piggy Back following Information:
+
+  <EVStateDependents>
+  Travelled Distance
+  Distance / SoC
+
+  Current electricity Price
+  Calculated input current
+  Next projected driving time

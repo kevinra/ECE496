@@ -3,36 +3,48 @@
 #include "EVStateNInputVInterface.hpp"
 #include "EVStateDependents.hpp"
 #include "InputVoltDependents.hpp"
-#include "CompressNUploadStatFile.hpp"
+#include "CompressNUploadStateFile.hpp"
+#include <curl/curl.h>
 
 int main()
 {
-	if (g_EVStateNInputVInterface.init() < 0)
-	{
-		ERR_MSG("global object g_EVStateNInputVInterface initialization failed!");
-	  return 0;
-	}
+  if ( g_EVStateNInputVInterface.init() )
+  {
+    ERR_MSG("global object g_EVStateNInputVInterface initialization failed!");
+    return 1;
+  }
 
   InputVoltDependents ivdThread;
   EVStateDependents evdThread;
-  if (ivdThread.init() )
+  CompressNUploadStatFile cnuThread;
+
+  CURLcode curlRetv;
+  if ( (curlRetv = curl_global_init(CURL_GLOBAL_DEFAULT)) != CURLE_OK )
   {
-  	DBG_ERR_MSG("InputVoltDependents thread initialization failed!");
-  	return 0;
-  }
-  if (evdThread.init() )
-  {
-  	DBG_ERR_MSG("EVStateDependents thread initialization failed!");
-  	return 0;
+    ERR_MSG("Global initialization of CURL API failed!");
+    return 1;
   }
 
+  
+  if ( ivdThread.init() )
+  {
+    ERR_MSG("InputVoltDependents thread initialization failed!");
+    return 1;
+  }
+  if ( evdThread.init() )
+  {
+    ERR_MSG("EVStateDependents thread initialization failed!");
+    return 1;
+  }
+  if ( cnuThread.init() )
+  {
+    ERR_MSG("EVStateDependents thread initialization failed!");
+    return 1;
+  }
 
-	curl_global_init(CURL_GLOBAL_DEFAULT);
-
-	evdThread.start();
+  evdThread.start();
   ivdThread.start();
-
-
+  cnuThread.start();
 
   if (! g_errQueue.isEmpty() )
   {

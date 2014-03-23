@@ -11,13 +11,13 @@
     std::cout << "DBG: " << __FILE__ << "(" << __LINE__ << ")::"\
          << __func__ << "> " << #var << " = [" << (var) << "]" << std::endl
   #define DBG_ERR_VAR(var) \
-    std::cerr << "DBG: " << __FILE__ << "(" << __LINE__ << ")::"\
+    std::cerr << "ERR: " << __FILE__ << "(" << __LINE__ << ")::"\
          << __func__ << "> " << #var << " = [" << (var) << "]" << std::endl
   #define DBG_OUT_MSG(msg) \
     std::cout << "DBG: " << __FILE__ << "(" << __LINE__ << ")::" \
          << __func__ << "> " << msg << std::endl
   #define DBG_ERR_MSG(msg) \
-    std::cerr << "DBG: " << __FILE__ << "(" << __LINE__ << ")::" \
+    std::cerr << "ERR: " << __FILE__ << "(" << __LINE__ << ")::" \
          << __func__ << "> " << msg << std::endl
 #else
   #define DBG_OUT_VAR(var)
@@ -31,6 +31,9 @@
          << __func__ << "> " << msg << std::endl
 
 #define ERRORSTRSIZE 150
+#define STATEFILE_STRSIZE 35
+#define STATEFILE_LOCATION "/home/root/stateFiles/"
+#define STATEFILE_FULLPATHSIZE 70
 
 #define GPIO_REC1_PF_ENABLE 60     // P9_12 = GPIO1_28
 #define GPIO_REC1_LD_ENABLE 48     // P9_15 = GPIO1_16

@@ -32,23 +32,29 @@ void timed_piece_of_code()
 
 int main()
 {
-  std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-  std::time_t now_c = std::chrono::system_clock::to_time_t( now );
+  using std::chrono;
+  system_clock::time_point now = system_clock::now();
+  std::time_t now_c = system_clock::to_time_t( now );
+
+
+
   std::cout << "One day ago, the time was "
             << std::put_time(std::localtime(&now_c), "%F %T") << '\n';
 
 
   std::cout << "Hello World\n";
   timed_piece_of_code();
-  std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+  system_clock::time_point end = system_clock::now();
 
   // std::chrono::duration<float, std::chrono::milliseconds::period> diffT = std::chrono::duration<float, std::chrono::milliseconds::period> (end - now);
-  std::chrono::duration<float> diffT = std::chrono::duration<float, std::chrono::milliseconds::period> (end - now);
+  duration<float> diffT = duration<float, milliseconds::period> (end - now);
+  float dt = diffT.count();
 
   std::cout << "Printing took "
-            << std::chrono::duration_cast<std::chrono::microseconds>(end - now).count()
+            << duration_cast<std::chrono::microseconds>(end - now).count()
             << std::endl
-            << diffT.count()
+            << dt
+            // << diffT.count()
             // << std::chrono::duration<float, std::chrono::milliseconds::period> (end - now).count()
             << "seconds.\n";
 

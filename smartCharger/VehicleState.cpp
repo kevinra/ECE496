@@ -43,8 +43,8 @@
 
 VehicleState::VehicleState()
 {
-  m_speedCur = 0;
-  m_speedOld = 0;
+  m_speedCur = 0.0f;
+  m_speedOld = 0.0f;
   m_eStop = FALSE;
   m_pBrake = FALSE;
   m_soc = 0;
@@ -65,7 +65,8 @@ VehicleState::VehicleState()
   m_driverFault = FALSE;
   m_isParked = TRUE;
   m_isFaultPresent = FALSE;
-  m_travelledDist = 0;
+  m_isSoCDecreased = FALSE;
+  m_travelledDist = 0.0f;
 }
 
 
@@ -73,22 +74,23 @@ VehicleState::~VehicleState()
 {
   if (m_ftpHandle)
   {
-    curl_easy_cleanup(m_ftpHandle); 
+    curl_easy_cleanup(m_ftpHandle);
   }
 }
 
 
 int VehicleState::init()
 {
-  DBG_OUT_MSG("");
+  m_tp_PrevTime = std::chrono::system_clock::now();
+
   m_ftpHandle = curl_easy_init();
   if (m_ftpHandle)
   {
-    curl_easy_setopt(m_ftpHandle, CURLOPT_URL,
-                     "http://192.168.3.201/cgi-bin/state.json");
+    // curl_easy_setopt(m_ftpHandle, CURLOPT_URL,
+    //                  "http://192.168.3.201/cgi-bin/state.json");
 
-    // curl_easy_setopt(curl, CURLOPT_URL,
-    //                  "http://192.168.1.147/state.json");
+    curl_easy_setopt(curl, CURLOPT_URL,
+                     "http://smartcharger.zapto.org/state.json");
 
     // Define our callback to get called when there's data to be written
     curl_easy_setopt(m_ftpHandle, CURLOPT_WRITEFUNCTION, VehicleState::my_fwrite);
@@ -103,40 +105,40 @@ int VehicleState::init()
   }
   else
   {
-    DBG_ERR_MSG("curl ftp handler initialization failed");
+    ERR_MSG("curl ftp handler initialization failed");
     return 1;
   }
   return 0;
 }
 
 
-int VehicleState::getCurDateNStateFile(time_t& rRawTime)
+int VehicleState::getCurDateNStateFile(chronoTP& rChronoTP_curTime)
 {
-  DBG_OUT_MSG("");
-  if ( setCurrentTimeStr(rRawTime) )
+  if ( setCurrentTimeStr(rChronoTP_curTime) )
   {
     return 1;
   }
-  outFile.fileName = m_dateNtimeStr;
-  outFile.stream = NULL;
+  m_outFile.fileName = m_dateNtimeStr;
+  m_outFile.stream = NULL;
 
-  res = curl_easy_perform(curl);
-  if (res != CURLE_OK)
+  CURLcode curlRetv;
+  if ( (curlRetv = curl_easy_perform(m_ftpHandle)) != CURLE_OK )
   {
-    DBG_ERR_MSG("Getting state.json failed. curl told us %d\n", res);
+    DBG_ERR_MSG( "Getting state.json failed. curl told us %s\n", curl_easy_strerror(res) );
     return 1;
   }
 
   // If there is content to write to the file
-  if (outFile.stream)
+  if (m_outFile.stream)
   {
-    fclose(outFile.stream);
+    fclose(m_outFile.stream);
   }
   else
   {
     DBG_ERR_MSG("ERROR: state.json content is empty");
     return 1;
   }
+  return 0;
 }
 
 
@@ -147,7 +149,7 @@ int VehicleState::extractData()
   m_tempMin = INITIALMINTEMPVAL;
   m_tempMax = INITIALMAXTEMPVAL;
 
-  stateFile = fopen("state.json" , "r");
+  stateFile = fopen(m_dateNtimeStr, "r");
   if(stateFile == NULL)
   {
     DBG_ERR_MSG("Cannot open state.json file\n");
@@ -182,6 +184,14 @@ int VehicleState::extractData()
         break;
       case POS_SOC:
         sscanf(line, "\t\t\"%[^:]:%d", attribute, &value);
+        if (value < m_soc)
+        {
+          m_isSoCDecreased = TRUE;
+        }
+        else
+        {
+          m_isSoCDecreased = FALSE;
+        }
         m_soc = value;
         break;
       case POS_FAULTMAP:
@@ -294,8 +304,9 @@ int VehicleState::extractData()
     m_isFaultPresent =  FALSE;
   }
 
-  // Trapezoid area formula. Note that speed is in the unit of km/h
-  m_travelledDist += (m_speedOld + m_speedCur) * difftime() / 7200
+  // Trapezoid area formula. Note that speed is in the unit of km/h and travelled distance
+  // is in meters
+  m_travelledDist += (m_speedOld + m_speedCur) * m_timeDiff * 1000 / 7200;
   return 0;
 }
 
@@ -303,26 +314,34 @@ int VehicleState::extractData()
 #ifdef DEBUG
 void printExtractedAttribs()
 {
-  DBG_OUT_MSG("m_speedOld:" << m_speedOld);
-  DBG_OUT_MSG("m_speedCur:" << m_speedCur);
-  DBG_OUT_MSG("m_eStop:" << m_eStop);
-  DBG_OUT_MSG("m_pBrake:" << m_pBrake);
-  DBG_OUT_MSG("m_soc:" << m_soc);
-  DBG_OUT_MSG("m_vCellMin:" << m_vCellMin);
-  DBG_OUT_MSG("m_vCellMax:" << m_vCellMax);
-  DBG_OUT_MSG("m_current:" << m_current);
-  DBG_OUT_MSG("m_tempMin" << m_tempMin);
-  DBG_OUT_MSG("m_tempMax:" << m_tempMax);
-  DBG_OUT_MSG("m_gearPos:" << m_gearPos);
-  DBG_OUT_MSG("m_accelPos:" << m_accelPos);
-  DBG_OUT_MSG("m_prev_faultMap" << m_prev_faultMap);
-  DBG_OUT_MSG("m_faultMap" << m_faultMap);
-  DBG_OUT_MSG("m_prev_driveWarning:" << m_prev_driveWarning);
-  DBG_OUT_MSG("m_driveWarning:" << m_driveWarning);
-  DBG_OUT_MSG("m_prev_driveOverTemp:" << m_prev_driveOverTemp);
-  DBG_OUT_MSG("m_driveOverTemp:" << m_driveOverTemp);
-  DBG_OUT_MSG("m_prev_driverFault:" << m_prev_driverFault);
-  DBG_OUT_MSG("m_driverFault:" << m_driverFault);
+  std::cout << "m_speedOld:" << m_speedOld << std::endl;
+  std::cout << "m_speedCur:" << m_speedCur << std::endl;
+  std::cout << "m_eStop:" << m_eStop << std::endl;
+  std::cout << "m_pBrake:" << m_pBrake << std::endl;
+  std::cout << "m_soc:" << m_soc << std::endl;
+  std::cout << "m_vCellMin:" << m_vCellMin << std::endl;
+  std::cout << "m_vCellMax:" << m_vCellMax << std::endl;
+  std::cout << "m_current:" << m_current << std::endl;
+  std::cout << "m_tempMin:" << m_tempMin << std::endl;
+  std::cout << "m_tempMax:" << m_tempMax << std::endl;
+  std::cout << "m_gearPos:" << m_gearPos << std::endl;
+  std::cout << "m_accelPos:" << m_accelPos << std::endl;
+  std::cout << "m_prev_faultMap:" << m_prev_faultMap << std::endl;
+  std::cout << "m_faultMap:" << m_faultMap << std::endl;
+  std::cout << "m_prev_driveWarning:" << m_prev_driveWarning << std::endl;
+  std::cout << "m_driveWarning:" << m_driveWarning << std::endl;
+  std::cout << "m_prev_driveOverTemp:" << m_prev_driveOverTemp << std::endl;
+  std::cout << "m_driveOverTemp:" << m_driveOverTemp << std::endl;
+  std::cout << "m_prev_driverFault:" << m_prev_driverFault << std::endl;
+  std::cout << "m_driverFault:" << m_driverFault << std::endl;
+
+  std::cout << "Printing derived variables." << std::endl;
+
+  std::cout << "m_isParked:" << m_prev_driveOverTemp << std::endl;
+  std::cout << "m_isFaultPresent:" << m_driveOverTemp << std::endl;
+  std::cout << "m_isSoCDecreased:" << m_prev_driverFault << std::endl;
+  std::cout << "m_travelledDist:" << m_driverFault << std::endl;
+  std::cout << "m_timeDiff:" << m_timeDiff << std::endl;
   return;
 }
 #endif
@@ -340,9 +359,15 @@ bool VehicleState::getIsFaultPresent()
 }
 
 
-double VehicleState::getTravelledDist()
+float VehicleState::getTravelledDist()
 {
   return m_travelledDist;
+}
+
+
+char* VehicleState::getStateFileName()
+{
+  return m_dateNtimeStr;
 }
 
 
@@ -406,14 +431,16 @@ bool VehicleState::convertStrToBoolean(char* strBoolean)
 }
 
 
-static size_t VehicleState::my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
+static size_t VehicleState::my_fwrite(void* buffer, size_t size, size_t nmemb, void *stream)
 {
   struct FtpFile *out=(struct FtpFile *)stream;
 
   if(out && !out->stream)
   {
     // open file for writing
-    out->stream = fopen(out->fileName, "wb");
+    char fileFullPath[STATEFILE_FULLPATHSIZE]
+    snprintf(fileFullPath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", out->fileName);
+    out->stream = fopen(fileFullPath, "wb");
     if(!out->stream)
       return -1; /* failure, can't open file to write */
   }
@@ -422,18 +449,17 @@ static size_t VehicleState::my_fwrite(void *buffer, size_t size, size_t nmemb, v
 }
 
 
-static int EVStateNInputVInterface::setCurrentTimeStr(time_t& rRawTime)
+static int EVStateNInputVInterface::setCurrentTimeStr(chronoTP& rChronoTP_curTime)
 {
-  struct tm* timeInfo;
+  using std::chrono;
+  rChronoTP_curTime = system_clock::now();
+  m_timeDiff = duration<float, milliseconds::period> (rChronoTP_curTime - m_tp_PrevTime).count();
+  struct std::tm* pTimeInfo = std::localtime( system_clock::to_time_t(rChronoTP_curTime) );
+  m_tp_PrevTime = rChronoTP_curTime;
 
-  m_rawPrevTime = rRawTime;
-
-  time(&rRawTime);
-  timeInfo = localtime(&rRawTime);
-
-  if ( snprintf(m_dateNtimeStr, TIMESTRSIZE, "%d|%.2d|%.2d_%.2d|%.2d|%.2d.txt", 
-                timeInfo->tm_year + 1900, timeInfo->tm_mon + 1, timeInfo->tm_mday, 
-                timeInfo->tm_hour, timeInfo->tm_min, timeInfo->tm_sec) < 0)
+  if ( snprintf(m_dateNtimeStr, STATEFILE_STRSIZE, "%d%.2d%.2d_%.2d%.2d%.2d_%f.txt", 
+                pTimeInfo->tm_year + 1900, pTimeInfo->tm_mon + 1, pTimeInfo->tm_mday, 
+                pTimeInfo->tm_hour, pTimeInfo->tm_min, pTimeInfo->tm_sec, m_timeDiff) < 0)
   {
     DBG_ERR_MSG("snprintf error occured!");
     return 1;
