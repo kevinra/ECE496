@@ -8,7 +8,6 @@
 */
 
 #include "CompressNUploadStateFile.hpp"
-#include "EVStateNUploaderInterface.hpp"
 #include <dirent.h>
 #include <unistd.h>
 #include <string.h>
@@ -59,8 +58,8 @@ void* CompressNUploadStateFile::run()
   {
 	  DIR* dir;
 	  struct dirent* ent;
-  	num7ZipCreated = 0;
-  	numFileAdded = 0;
+  	m_num7ZipCreated = 0;
+  	m_numFileAdded = 0;
 
 	  if ( (dir = opendir(STATEFILE_LOCATION)) != NULL )
 	  {
@@ -73,7 +72,7 @@ void* CompressNUploadStateFile::run()
 	      if (*(ent->d_name) == 'S')
 	      {
 	      	// Compress the group of files with 7zip and upload
-	      	if (numFileAdded == SIZE_COMPRESSGROUP)
+	      	if (m_numFileAdded == SIZE_COMPRESSGROUP)
 	      	{
 	      		compressNUploadGroup(fileListStr);
 	      	}
@@ -86,11 +85,11 @@ void* CompressNUploadStateFile::run()
 	      }
 	    	else if ( is7zFile(ent->d_name) )
 	    	{
-	    		upload7zFile(ent->d_name)
+	    		upload7zFile(ent->d_name);
 	    	}
 	    }
 	    // Upload remaining not-yet uploaded file
-	    if (numFileAdded != 0)
+	    if (m_numFileAdded != 0)
 	    {
 	    	compressNUploadGroup(fileListStr);
 	    }
@@ -114,25 +113,25 @@ bool CompressNUploadStateFile::is7zFile(char fileName[])
 {
 	char ext7z[] = ".7z";
 	int i_2 = 0;
-	for (int i_1 = 0; fileName[i_1] != NULL; i_1++)
+	for (int i_1 = 0; fileName[i_1] != '\0'; i_1++)
 	{
 		if (fileName[i_1] == ext7z[i_2])
 		{
 			i_1++;
 			i_2++;
-			while(fileName[i_1] != NULL && ext7z[i_2] != NULL)
+			while(fileName[i_1] != '\0' && ext7z[i_2] != '\0')
 			{
 				if (fileName[i_1] != ext7z[i_2])
 				{
-					return FALSE;
+					return false;
 				}
 				i_1++;
 				i_2++;
 			}
-			return TRUE;
+			return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 
@@ -156,7 +155,7 @@ void CompressNUploadStateFile::compressNUploadGroup(char fileListStr[])
   		ERR_MSG("7z file in " << compressOutArg << " delete failed!");
   	}
   	#else
-  	execl(BINARYLOCATION_RM, BINARYLOCATION_RM, compressOutArg)
+  	execl(BINARYLOCATION_RM, BINARYLOCATION_RM, compressOutArg);
   	#endif
 
 		memset(fileListStr, 0, SIZE_COMPRESSFILELISTSTR);
@@ -169,12 +168,12 @@ void CompressNUploadStateFile::compressNUploadGroup(char fileListStr[])
   // Remove state files that are contained in the 
   // uploaded compressed file
   #ifdef DEBUG
-  if ( execl(BINARYLOCATION_RM, BINARYLOCATION_RM, file_7zPath) )
+  if ( execl(BINARYLOCATION_RM, BINARYLOCATION_RM, fileListStr) )
   {
-  	ERR_MSG("7z file in " << file_7zPath << " delete failed!");
+  	ERR_MSG("State files in " << fileListStr << " delete failed!");
   }
   #else
-  execl(BINARYLOCATION_RM, BINARYLOCATION_RM, file_7zPath);
+  execl(BINARYLOCATION_RM, BINARYLOCATION_RM, fileListStr);
   #endif
 
 	memset(fileListStr, 0, SIZE_COMPRESSFILELISTSTR);

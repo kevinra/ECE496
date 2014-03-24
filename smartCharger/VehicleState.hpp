@@ -10,12 +10,17 @@
 #ifndef VEHICLESTATE_HPP
 #define VEHICLESTATE_HPP
 
-#include "common.h"
+#include "common.hpp"
 #include <curl/curl.h>
 #include <chrono>
 #include <ctime>
 
 typedef std::chrono::system_clock::time_point chronoTP;
+struct FtpFile
+{
+  char* fileName;
+  FILE* stream;
+};
 
 class VehicleState
 {
@@ -24,7 +29,7 @@ public:
   ~VehicleState();
 
   int init();
-  int getCurDateNStateFile(time_t* pRawTime);
+  int getCurDateNStateFile(chronoTP& pRawTime);
   int extractData();
   #ifdef DEBUG
   void printExtractedAttribs();
@@ -65,8 +70,8 @@ private:
   bool m_driveWarning;
   bool m_prev_driveOverTemp;
   bool m_driveOverTemp;
-  bool m_prev_driverFault;
-  bool m_driverFault;
+  bool m_prev_driveFault;
+  bool m_driveFault;
 
   bool m_isParked;
   bool m_isFaultPresent;
@@ -81,9 +86,9 @@ private:
   float m_timeDiff;
   chronoTP m_tp_PrevTime;
 
-  bool convertStrToBoolean(char* strBoolean);
+  bool convertStrToBoolean(char strBoolean[]);
   static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream);
-  static void setCurrentTimeStr();
+  bool setCurrentTimeStr(chronoTP& rChronoTP_curTime);
 };
 
 #endif // VEHICLESTATE_HPP

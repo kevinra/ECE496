@@ -12,7 +12,7 @@
 
 #include "VehicleState.hpp"
 #include "common.hpp"
-#include "thread/Thread.hpp"
+#include "Thread.hpp"
 
 // #define NORMAL 0
 // #define PREHEAT 1
@@ -31,7 +31,7 @@ enum vclMvmState
   S0_PARKED_NOT_CHARGING = 0,
   S1_PARKED_CHARGING,
   S2_CRUSING,
-}
+};
 
 
 class EVStateDependents: public Thread
@@ -50,25 +50,27 @@ private:
   float m_lastTravelledDist;
   float m_distPerSoC;
   bool m_isFaultFromStateFile;
-  I2CWrapper* m_pI2C_fpga;
+  // I2CWrapper* m_pI2C_fpga;
+
   // GPIOWrapper* m_pGPIO_heater;
   // heaterState m_heaterState;
   // bool m_isHeaterOoS;
   // bool m_isHeaterOn;
   // int m_tempthrshld1;
   // int m_tempthrshld2;
-
-  m_nextDrivingTime;
-  chronoTP m_tp_curTime;
   // time_t m_lastTempQueryTime;
 
+  // m_nextDrivingTime;
+  chronoTP m_tp_curTime;
 
   // methods
   void vclmvmRecordHandle();
-  void fpgaCtrl();
+  // void fpgaCtrl();
   void piggybackInfoNRenameFileWithVclMvm();
   int sqlFindCorrespRowID();
-  void sqlUpdateCorrepRowID(float td);
+  static int selectCallback(void* data, int argc, char **argv, char **azColName);
+  void sqlUpdateCorrespRowID(float td);
+
   /*
   void heaterCtrl();
   void setTempLvl(int isPreHeat);

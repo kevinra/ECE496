@@ -32,7 +32,7 @@ void timed_piece_of_code()
 
 int main()
 {
-  using std::chrono;
+  using namespace std::chrono;
   system_clock::time_point now = system_clock::now();
   std::time_t now_c = system_clock::to_time_t( now );
 

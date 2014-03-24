@@ -45,6 +45,6 @@
 #define GPIO_BATRELAY 115          // P9_27 = GPIO3_19
 #define GPIO_FPGAINTERRUPT 112     // P9_30 = GPIO3_16
 
-extern <type> g_errQueue;
+// extern <type> g_errQueue;
 
 #endif // COMMON_HPP

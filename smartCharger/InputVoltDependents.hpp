@@ -11,7 +11,7 @@
 #define INPUTVOLTDEPENDENTS_HPP
 
 #include "common.hpp"
-#include "thread/Thread.hpp"
+#include "Thread.hpp"
 
 class InputVoltDependents: public Thread
 {

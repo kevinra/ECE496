@@ -16,8 +16,8 @@ EVStateNInputVInterface g_EVStateNInputVInterface;
 EVStateNInputVInterface::EVStateNInputVInterface()
 {
   m_inputVolt = 0;
-  m_isVoltmeterOoS = FALSE;
-  m_isErrorFromStateFile = FALSE;
+  m_isVoltmeterOoS = false;
+  m_isErrorFromStateFile = false;
   pthread_mutex_init(&m_inputVoltMtx, NULL);
   pthread_mutex_init(&m_isVoltmeterOoSMtx, NULL);
   pthread_mutex_init(&m_isErrorFromStateFil  Mtx, NULL);

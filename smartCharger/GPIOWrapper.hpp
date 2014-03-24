@@ -51,4 +51,4 @@ private:
 };
 
 
-#endif GPIOWRAPPER_HPP
+#endif // GPIOWRAPPER_HPP

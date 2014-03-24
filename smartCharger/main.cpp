@@ -1,8 +1,6 @@
-// queryServer(electricity_Price) - as future support
-
 #include "EVStateNInputVInterface.hpp"
 #include "EVStateDependents.hpp"
-#include "InputVoltDependents.hpp"
+// #include "InputVoltDependents.hpp"
 #include "CompressNUploadStateFile.hpp"
 #include <curl/curl.h>
 
@@ -14,9 +12,9 @@ int main()
     return 1;
   }
 
-  InputVoltDependents ivdThread;
+  // InputVoltDependents ivdThread;
   EVStateDependents evdThread;
-  CompressNUploadStatFile cnuThread;
+  CompressNUploadStateFile cnuThread;
 
   CURLcode curlRetv;
   if ( (curlRetv = curl_global_init(CURL_GLOBAL_DEFAULT)) != CURLE_OK )
@@ -24,13 +22,12 @@ int main()
     ERR_MSG("Global initialization of CURL API failed!");
     return 1;
   }
-
   
-  if ( ivdThread.init() )
-  {
-    ERR_MSG("InputVoltDependents thread initialization failed!");
-    return 1;
-  }
+  // if ( ivdThread.init() )
+  // {
+  //   ERR_MSG("InputVoltDependents thread initialization failed!");
+  //   return 1;
+  // }
   if ( evdThread.init() )
   {
     ERR_MSG("EVStateDependents thread initialization failed!");
@@ -43,13 +40,8 @@ int main()
   }
 
   evdThread.start();
-  ivdThread.start();
+  // ivdThread.start();
   cnuThread.start();
-
-  if (! g_errQueue.isEmpty() )
-  {
-  	upload data
-  }
 
 	curl_global_cleanup();
 	return 0;

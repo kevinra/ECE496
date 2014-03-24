@@ -45,8 +45,8 @@ VehicleState::VehicleState()
 {
   m_speedCur = 0.0f;
   m_speedOld = 0.0f;
-  m_eStop = FALSE;
-  m_pBrake = FALSE;
+  m_eStop = false;
+  m_pBrake = false;
   m_soc = 0;
   m_vCellMin = 0;
   m_vCellMax = 0;
@@ -57,15 +57,15 @@ VehicleState::VehicleState()
   m_accelPos = 0;
   m_prev_faultMap = 0;
   m_faultMap = 0;
-  m_prev_driveWarning = FALSE;
-  m_driveWarning = FALSE;
-  m_prev_driveOverTemp = FALSE;
-  m_driveOverTemp = FALSE;
-  m_prev_driverFault = FALSE;
-  m_driverFault = FALSE;
-  m_isParked = TRUE;
-  m_isFaultPresent = FALSE;
-  m_isSoCDecreased = FALSE;
+  m_prev_driveWarning = false;
+  m_driveWarning = false;
+  m_prev_driveOverTemp = false;
+  m_driveOverTemp = false;
+  m_prev_driveFault = false;
+  m_driveFault = false;
+  m_isParked = true;
+  m_isFaultPresent = false;
+  m_isSoCDecreased = false;
   m_travelledDist = 0.0f;
 }
 
@@ -89,7 +89,7 @@ int VehicleState::init()
     // curl_easy_setopt(m_ftpHandle, CURLOPT_URL,
     //                  "http://192.168.3.201/cgi-bin/state.json");
 
-    curl_easy_setopt(curl, CURLOPT_URL,
+    curl_easy_setopt(m_ftpHandle, CURLOPT_URL,
                      "http://smartcharger.zapto.org/state.json");
 
     // Define our callback to get called when there's data to be written
@@ -124,7 +124,7 @@ int VehicleState::getCurDateNStateFile(chronoTP& rChronoTP_curTime)
   CURLcode curlRetv;
   if ( (curlRetv = curl_easy_perform(m_ftpHandle)) != CURLE_OK )
   {
-    DBG_ERR_MSG( "Getting state.json failed. curl told us %s\n", curl_easy_strerror(res) );
+    DBG_ERR_MSG( "Getting state.json failed. curl told us " << curl_easy_strerror(curlRetv) );
     return 1;
   }
 
@@ -165,7 +165,7 @@ int VehicleState::extractData()
     }
 
     char attribute[ATTRIBSIZE];
-    char boolStr[BOOLSTRSIZE]
+    char boolStr[BOOLSTRSIZE];
     int value;
     switch(i)
     {
@@ -179,24 +179,24 @@ int VehicleState::extractData()
         m_eStop = convertStrToBoolean(boolStr);
         break;
       case POS_PBRAKE:
-        sscanf(line, "\t\t\"%[^:]:%d", attribute, boolStr);
+        sscanf(line, "\t\t\"%[^:]:%s", attribute, boolStr);
         m_pBrake = convertStrToBoolean(boolStr);
         break;
       case POS_SOC:
         sscanf(line, "\t\t\"%[^:]:%d", attribute, &value);
         if (value < m_soc)
         {
-          m_isSoCDecreased = TRUE;
+          m_isSoCDecreased = true;
         }
         else
         {
-          m_isSoCDecreased = FALSE;
+          m_isSoCDecreased = false;
         }
         m_soc = value;
         break;
       case POS_FAULTMAP:
         sscanf(line, "\t\t\"%[^:]:%d", attribute, &value);
-        m_prev_faultMap - m_faultMap;
+        m_prev_faultMap = m_faultMap;
         m_faultMap = value;
         break;
       case POS_VCELLMIN:
@@ -256,19 +256,19 @@ int VehicleState::extractData()
         }
         break;
       case POS_DRIVEWARNING:
-        sscanf(line, "\t\t\"%[^:]:%d", attribute, boolStr);
-        m_prev_ = m_driveWarning;
+        sscanf(line, "\t\t\"%[^:]:%s", attribute, boolStr);
+        m_prev_driveWarning = m_driveWarning;
         m_driveWarning = convertStrToBoolean(boolStr);
         break;
       case POS_DRIVEOVERTEMP:
-        sscanf(line, "\t\t\"%[^:]:%d", attribute, boolStr);
+        sscanf(line, "\t\t\"%[^:]:%s", attribute, boolStr);
         m_prev_driveOverTemp = m_driveOverTemp;
         m_driveOverTemp = convertStrToBoolean(boolStr);
         break;
       case POS_DRIVEFAULT:
-        sscanf(line, "\t\t\"%[^:]:%d", attribute, boolStr);
-        m_prev_driverFault = m_driverFault;
-        m_driverFault = convertStrToBoolean(boolStr);
+        sscanf(line, "\t\t\"%[^:]:%s", attribute, boolStr);
+        m_prev_driveFault = m_driveFault;
+        m_driveFault = convertStrToBoolean(boolStr);
         break;
       case POS_GEARPOS:
         sscanf(line, "\t\t\"%[^:]:%d", attribute, &value);
@@ -283,25 +283,25 @@ int VehicleState::extractData()
 
   fclose(stateFile);
 
-  if (m_pBrake == TRUE && m_speedCur == 0 && m_gearPos == GEARPOS_NEUTRAL && m_accelPos == 0)
+  if (m_pBrake == true && m_speedCur == 0 && m_gearPos == GEARPOS_NEUTRAL && m_accelPos == 0)
   {
     DBG_OUT_MSG("Vehicle is currently parked.");
-    m_isParked = TRUE;
+    m_isParked = true;
   }
   else
   {
     DBG_OUT_MSG("Vehicle is not parked.");
-    m_isParked FALSE;
+    m_isParked = false;
   }
-  if (m_faultMap != 0 || m_driveWarning || m_driveOverTemp || m_driverFault)
+  if (m_faultMap != 0 || m_driveWarning || m_driveOverTemp || m_driveFault)
   {
     DBG_OUT_MSG("Vehicle fault is reported!");
-    m_isFaultPresent =  TRUE;
+    m_isFaultPresent =  true;
   }
   else
   {
     DBG_OUT_MSG("No vehicle fault is reported!");
-    m_isFaultPresent =  FALSE;
+    m_isFaultPresent =  false;
   }
 
   // Trapezoid area formula. Note that speed is in the unit of km/h and travelled distance
@@ -312,7 +312,7 @@ int VehicleState::extractData()
 
 
 #ifdef DEBUG
-void printExtractedAttribs()
+void VehicleState::printExtractedAttribs()
 {
   std::cout << "m_speedOld:" << m_speedOld << std::endl;
   std::cout << "m_speedCur:" << m_speedCur << std::endl;
@@ -332,15 +332,15 @@ void printExtractedAttribs()
   std::cout << "m_driveWarning:" << m_driveWarning << std::endl;
   std::cout << "m_prev_driveOverTemp:" << m_prev_driveOverTemp << std::endl;
   std::cout << "m_driveOverTemp:" << m_driveOverTemp << std::endl;
-  std::cout << "m_prev_driverFault:" << m_prev_driverFault << std::endl;
-  std::cout << "m_driverFault:" << m_driverFault << std::endl;
+  std::cout << "m_prev_driveFault:" << m_prev_driveFault << std::endl;
+  std::cout << "m_driveFault:" << m_driveFault << std::endl;
 
   std::cout << "Printing derived variables." << std::endl;
 
   std::cout << "m_isParked:" << m_prev_driveOverTemp << std::endl;
   std::cout << "m_isFaultPresent:" << m_driveOverTemp << std::endl;
-  std::cout << "m_isSoCDecreased:" << m_prev_driverFault << std::endl;
-  std::cout << "m_travelledDist:" << m_driverFault << std::endl;
+  std::cout << "m_isSoCDecreased:" << m_prev_driveFault << std::endl;
+  std::cout << "m_travelledDist:" << m_driveFault << std::endl;
   std::cout << "m_timeDiff:" << m_timeDiff << std::endl;
   return;
 }
@@ -359,6 +359,12 @@ bool VehicleState::getIsFaultPresent()
 }
 
 
+bool VehicleState::getIsSoCDecreased()
+{
+  return m_isSoCDecreased;
+}
+
+
 float VehicleState::getTravelledDist()
 {
   return m_travelledDist;
@@ -374,14 +380,14 @@ char* VehicleState::getStateFileName()
 bool VehicleState::isDifferentError()
 {
   if (m_prev_faultMap != m_faultMap)
-    return TRUE;
+    return true;
   if (m_prev_driveWarning != m_driveWarning)
-    return TRUE;
-  if (m_prev_driveOvertemp != m_driveOvertemp)
-    return TRUE;
+    return true;
+  if (m_prev_driveOverTemp != m_driveOverTemp)
+    return true;
   if (m_prev_driveFault != m_driveFault)
-    return TRUE;
-  return FALSE;
+    return true;
+  return false;
 }
 
 
@@ -390,19 +396,19 @@ void VehicleState::generateErrorStr(char* pDest)
   memset((void*)pDest, 0, ERRORSTRSIZE * sizeof(char));
   if (m_faultMap != 0)
   {
-    strncat(errStr, "Battery faultmap is non-zero!\n", 32);
+    strncat(pDest, "Battery faultmap is non-zero!\n", 32);
   }
   if (m_driveWarning)
   {
-    strncat(errStr, "Drive warning is reported!\n", 30);
+    strncat(pDest, "Drive warning is reported!\n", 30);
   }
-  if (m_driveOvertemp)
+  if (m_driveOverTemp)
   {
-    strncat(errStr, "Drive over temperature is reported!\n", 40);
+    strncat(pDest, "Drive over temperature is reported!\n", 40);
   }
   if (m_driveFault)
   {
-    strncat(errStr, "Drive fault is reported!\n", 30);
+    strncat(pDest, "Drive fault is reported!\n", 30);
   }
   return;
 }
@@ -416,29 +422,29 @@ void VehicleState::resetTravelledDist()
 
 // Private methods
 
-bool VehicleState::convertStrToBoolean(char* strBoolean)
+bool VehicleState::convertStrToBoolean(char strBoolean[])
 {
   if ( strncmp(strBoolean, BOOLEANSTR_TRUE, BOOLSTRSIZE) )
   {
-    return TRUE;
+    return true;
   }
   if ( strncmp(strBoolean, BOOLEANSTR_FALSE, BOOLSTRSIZE) )
   {
-    return FALSE;
+    return false;
   }
   DBG_ERR_MSG("Boolean string is neither true or false!");
-  return FALSE;
+  return false;
 }
 
 
-static size_t VehicleState::my_fwrite(void* buffer, size_t size, size_t nmemb, void *stream)
+size_t VehicleState::my_fwrite(void* buffer, size_t size, size_t nmemb, void *stream)
 {
   struct FtpFile *out=(struct FtpFile *)stream;
 
   if(out && !out->stream)
   {
     // open file for writing
-    char fileFullPath[STATEFILE_FULLPATHSIZE]
+    char fileFullPath[STATEFILE_FULLPATHSIZE];
     snprintf(fileFullPath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", out->fileName);
     out->stream = fopen(fileFullPath, "wb");
     if(!out->stream)
@@ -449,12 +455,13 @@ static size_t VehicleState::my_fwrite(void* buffer, size_t size, size_t nmemb, v
 }
 
 
-static int EVStateNInputVInterface::setCurrentTimeStr(chronoTP& rChronoTP_curTime)
+bool VehicleState::setCurrentTimeStr(chronoTP& rChronoTP_curTime)
 {
-  using std::chrono;
+  using namespace std::chrono;
   rChronoTP_curTime = system_clock::now();
   m_timeDiff = duration<float, milliseconds::period> (rChronoTP_curTime - m_tp_PrevTime).count();
-  struct std::tm* pTimeInfo = std::localtime( system_clock::to_time_t(rChronoTP_curTime) );
+  std::time_t m_tt_curTime = system_clock::to_time_t(rChronoTP_curTime);
+  struct std::tm* pTimeInfo = std::localtime(&m_tt_curTime);
   m_tp_PrevTime = rChronoTP_curTime;
 
   if ( snprintf(m_dateNtimeStr, STATEFILE_STRSIZE, "%d%.2d%.2d_%.2d%.2d%.2d_%f.txt", 

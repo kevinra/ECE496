@@ -11,12 +11,12 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
-#include <sqlite3.h> 
+#include <unistd.h>
+#include <sqlite3.h>
 #include "EVStateDependents.hpp"
 #include "EVStateNInputVInterface.hpp"
-#include "EVStateNUploaderInterface.hpp"
 #include "VehicleState.hpp"
-#include "I2CWrapper.hpp"
+// #include "I2CWrapper.hpp"
 // #include "GPIOWrapper.hpp"
 
 // #define TEMP_1 5
@@ -36,12 +36,13 @@ EVStateDependents::EVStateDependents()
   m_vmState = S0_PARKED_NOT_CHARGING;
   m_vmRowID = 0;
   m_lastTravelledDist = 0;
-  m_distPerSoc = DISTPERSOC_INIT;
-  m_isFaultFromStateFile = FALSE;
-  m_pI2C_fpga = new I2CWrapper();
+  m_distPerSoC = DISTPERSOC_INIT;
+  m_isFaultFromStateFile = false;
+  // m_pI2C_fpga = new I2CWrapper();
+
   // m_heaterState = S0_IDLE;
-  // m_isHeaterOoS = FALSE;
-  // m_isHeaterOn = FALSE;
+  // m_isHeaterOoS = false;
+  // m_isHeaterOn = false;
   // m_tempthrshld1; = TEMP_1;
   // m_tempthrshld2; = TEMP_2;
   // m_pGPIO_heater = new GPIOWrapper(GPIO_Heater);
@@ -50,7 +51,7 @@ EVStateDependents::EVStateDependents()
 EVStateDependents::~EVStateDependents()
 {
   delete m_pVS_evState;
-  delete m_pI2C_fpga;
+  // delete m_pI2C_fpga;
   // delete m_pGPIO_heater;
 }
 
@@ -67,11 +68,11 @@ int EVStateDependents::init()
     DBG_ERR_MSG("VehicleState object initialization failed!");
     return 1;
   }
-  if ( m_pI2C_fpga->init() )
-  {
-    DBG_ERR_MSG("FPGA I2C initialization failed!");
-    return 1;
-  }
+  // if ( m_pI2C_fpga->init() )
+  // {
+  //   DBG_ERR_MSG("FPGA I2C initialization failed!");
+  //   return 1;
+  // }
   // if ( m_pGPIO_heater->init() )
   // {
   //   DBG_ERR_MSG("Heater GPIO initialization failed!");
@@ -88,20 +89,22 @@ void* EVStateDependents::run()
     // If state file is successfully obtained
     if ( !m_pVS_evState->getCurDateNStateFile(m_tp_curTime) )
     {
-      if ( !m_pVS_evState->extractData(m_tp_curTime) )
+      if ( !m_pVS_evState->extractData() )
       {
         if ( ( m_isFaultFromStateFile = m_pVS_evState->getIsFaultPresent() ) )
         {
-          DBG_OUT_MSG("State.json file has fault.")
+          DBG_OUT_MSG("State.json file has a fault.");
           if ( m_pVS_evState->isDifferentError() )
           {
-            char errorStr[ERRORSTRSIZE];
-            m_pVS_evState->generateErrorStr(errorStr);
-            g_errQueue.addErrStr(errorStr);
+            // char errorStr[ERRORSTRSIZE];
+            // m_pVS_evState->generateErrorStr(errorStr);
+            // g_errQueue.addErrStr(errorStr);
           }
         }
         vclmvmRecordHandle();
-        fpgaCtrl();
+
+        // fpgaCtrl();
+        
         // heaterCtrl();
         piggybackInfoNRenameFileWithVclMvm();
       }
@@ -110,14 +113,14 @@ void* EVStateDependents::run()
 }
 
 
-void vclmvmRecordHandle()
+void EVStateDependents::vclmvmRecordHandle()
 {
   // FSM logic
   switch (m_vmState)
   {
     case S0_PARKED_NOT_CHARGING:
       DBG_OUT_MSG("VM Record State: S0_PARKED_NOT_CHARGING");
-      if (g_EVStateNInputVInterface.getShouldFPGAon() )
+      if (g_EVStateNInputVInterface.getShouldFPGAOn() )
       {
         m_vmState = S1_PARKED_CHARGING;
       }
@@ -131,7 +134,7 @@ void vclmvmRecordHandle()
       break;
     case S1_PARKED_CHARGING:
       DBG_OUT_MSG("VM Record State: S1_PARKED_CHARGING");
-      if ( !g_EVStateNInputVInterface.getShouldFPGAon() || m_isFaultFromStateFile)
+      if ( !g_EVStateNInputVInterface.getShouldFPGAOn() || m_isFaultFromStateFile)
       {
         m_vmState = S1_PARKED_CHARGING;
       }
@@ -143,11 +146,11 @@ void vclmvmRecordHandle()
         // Instead of calculating average, it uses how TCP calculates timeout period.
         // There is room for improvement, of course.
         float curTotalDist = m_pVS_evState->getTravelledDist();
-        m_distPerSoc = ALPHA * m_distPerSoc + (1 - ALPHA) * (curTotalDist - m_lastTravelledDist);
+        m_distPerSoC = ALPHA * m_distPerSoC + (1 - ALPHA) * (curTotalDist - m_lastTravelledDist);
         m_lastTravelledDist = curTotalDist;
-        DBG_OUT_MSG("SOC decreased. m_distPerSoc is updated to " << m_distPerSoc);
+        DBG_OUT_MSG("SOC decreased. m_distPerSoC is updated to " << m_distPerSoC);
       }
-      if ( m_pVS_evState.getIsParked() )
+      if ( m_pVS_evState->getIsParked() )
       {
         // If rowID obtained is zero, it means that the program failed
         // to obtain a tuple that matches criteria
@@ -155,10 +158,10 @@ void vclmvmRecordHandle()
         {
           float td = m_pVS_evState->getTravelledDist();
           sqlUpdateCorrespRowID(td);
+          DBG_OUT_MSG("Total distance travelled for this trip: " << td);
         }
         m_pVS_evState->resetTravelledDist();
         m_vmState = S0_PARKED_NOT_CHARGING;
-        DBG_OUT_MSG("Total distance travelled for this trip: " << td);
       }
       break;
 
@@ -169,11 +172,12 @@ void vclmvmRecordHandle()
 }
 
 
+/*
 // FPGA has timeout mechanism so that it will not send signals to LLCs if it hasn't
 // received any signals for 1 second.
 void EVStateDependents::fpgaCtrl()
 {
-  if ( !g_EVStateNInputVInterface.getShouldFPGAon() ||
+  if ( !g_EVStateNInputVInterface.getShouldFPGAOn() ||
        m_isFaultFromStateFile ||
        g_EVStateNInputVInterface.getIsChargingHWOoS()
      )
@@ -184,23 +188,24 @@ void EVStateDependents::fpgaCtrl()
   int inputCurrent = calculateInputCurrent();
   if ( FPGAI2C(InputCurrent) )
   {
-    g_EVStateNInputVInterface.setIsChargingHWOoS(TRUE)
+    g_EVStateNInputVInterface.setIsChargingHWOoS(true)
   }
 }
+*/
 
 
-void piggybackInfoNRenameFileWithVclMvm()
+void EVStateDependents::piggybackInfoNRenameFileWithVclMvm()
 {
   // Piggyback derived information into state file.
   char origFilePath[STATEFILE_FULLPATHSIZE];
   char newFilePath[STATEFILE_FULLPATHSIZE];
-  char* origStateFileName = m_pVS_evState.getStateFileName();
+  char* origStateFileName = m_pVS_evState->getStateFileName();
   snprintf(origFilePath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", origStateFileName);
 
   std::ofstream fs;
   fs.open(origFilePath, std::ios::out | std::ios::app);
-  fs << "\n\"travelledDistance\": " << m_pVS_evState.getTravelledDist() << ",\n";
-  fs << "\n\"distancePerSoC\": " << m_distPerSoc << "\n\n";
+  fs << "\n\"travelledDistance\": " << m_pVS_evState->getTravelledDist() << ",\n";
+  fs << "\n\"distancePerSoC\": " << m_distPerSoC << "\n\n";
   fs.close();
 
   // Rename the file
@@ -217,12 +222,12 @@ void piggybackInfoNRenameFileWithVclMvm()
     snprintf(newFilePath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "S2_%s", origStateFileName);
   }
   #ifdef DEBUG
-  if ( exec(BINARYLOCATION_MOVE, BINARYLOCATION_MOVE, origFilePath, newFilePath, NULL) )
+  if ( execl(BINARYLOCATION_MOVE, BINARYLOCATION_MOVE, origFilePath, newFilePath, NULL) )
   {
     ERR_MSG("Renaming " << origFilePath << " to " << newFilePath << " failed!");
   }
   #else
-  exec(BINARYLOCATION_MOVE, BINARYLOCATION_MOVE, origFilePath, newFilePath, NULL);
+  execl(BINARYLOCATION_MOVE, BINARYLOCATION_MOVE, origFilePath, newFilePath, NULL);
   #endif
 
   return;
@@ -237,8 +242,9 @@ int EVStateDependents::sqlFindCorrespRowID()
   char *zErrMsg = 0;
   int rowID = 0;
 
-  using std::chrono;
-  struct std::tm* pTimeInfo = std::localtime( system_clock::to_time_t(m_tp_curTime) );
+  using namespace std::chrono;
+  std::time_t m_tt_curTime = system_clock::to_time_t(m_tp_curTime);
+  struct std::tm* pTimeInfo = std::localtime(&m_tt_curTime);
 
   // Open database
   if( sqlite3_open(DBNAME, &db) )
@@ -263,7 +269,7 @@ int EVStateDependents::sqlFindCorrespRowID()
            "SELECT rowID FROM dc WHERE day=%d AND starthour=%d AND startmin=%d",
            pTimeInfo->tm_wday, pTimeInfo->tm_hour, roundedMin);
 
-  if( sqlite3_exec(db, sql, selectCallback, (void*)&rowID, &zErrMsg) != SQLITE_OK )
+  if( sqlite3_exec(db, sql, EVStateDependents::selectCallback, (void*)&rowID, &zErrMsg) != SQLITE_OK )
   {
     DBG_ERR_MSG("SQL SELECT error! SQLite3 said: " << zErrMsg);
     sqlite3_free(zErrMsg);
@@ -274,7 +280,7 @@ int EVStateDependents::sqlFindCorrespRowID()
 }
 
 
-static int selectCallback(void* data, int argc, char **argv, char **azColName)
+int EVStateDependents::selectCallback(void* data, int argc, char **argv, char **azColName)
 {
    *(int*)data = atoi(argv[0]);
    return 0;
@@ -320,12 +326,12 @@ void EVStateDependents::heaterCtrl()
   {
     case S0_IDLE:
       DBG_OUT_MSG("HeaterState: S0");
-      if ( g_EVStateNInputVInterface.getShouldFPGAon() )
+      if ( g_EVStateNInputVInterface.getShouldFPGAOn() )
       {
         // If temperature data is outdated
         if (g_currentDate - m_lastTempQueryTime > TEMPQUERYINTERVAL)
         {
-          t1t4Interface.setIsTempReady(FALSE);
+          t1t4Interface.setIsTempReady(false);
           t1t4Interface.queryOutsideTemp; // like cvSignal; wake up T4
           m_heaterState = S1;
         }
@@ -342,14 +348,14 @@ void EVStateDependents::heaterCtrl()
         m_lastTempQueryTime = g_currentDate;
         m_heaterState = S2;
       }
-      else if (! g_EVStateNInputVInterface.getShouldFPGAon() )
+      else if (! g_EVStateNInputVInterface.getShouldFPGAOn() )
       {
         m_heaterState = S0;
       }
       break;
     case S2_GOT_TEMP:
       DBG_OUT_MSG("HeaterState: S2");
-      if (! g_EVStateNInputVInterface.getShouldFPGAon() )
+      if (! g_EVStateNInputVInterface.getShouldFPGAOn() )
       {
         m_heaterState = S0;
       }
@@ -361,30 +367,30 @@ void EVStateDependents::heaterCtrl()
       break;
     case S3_TEMPLIMIT_RAISED:
       DBG_OUT_MSG("HeaterState: S3");
-      if (! g_EVStateNInputVInterface.getShouldFPGAon() )
+      if (! g_EVStateNInputVInterface.getShouldFPGAOn() )
       {
         setTempLevel(NORMAL);
         m_heaterState = S0;
       }
       break;
     default:
-      m_isHeaterOoS = TRUE;
+      m_isHeaterOoS = true;
       DBG_ERR_MSG("Unknown heater State!");
   }
 
-  if ( g_EVStateNInputVInterface.getShouldFPGAon() ) // charging mode
+  if ( g_EVStateNInputVInterface.getShouldFPGAOn() ) // charging mode
   {
     if ( !m_isHeaterOn && m_pVS_evState->getMinTemp() < TEMPTHRSHLD_1 )
     {
       if ( m_pGPIO_heater->gpioSet(HIGH) )
       {
         DBG_ERR_MSG("Heater GPIO set(HIGH) failed!");
-        m_isHeaterOoS = TRUE;
+        m_isHeaterOoS = true;
       }
       else
       {
         DBG_OUT_MSG("HEATER: ON");
-        m_isHeaterOn = TRUE;
+        m_isHeaterOn = true;
       }
 
     } // Else if the heater is on and it is above the second threshold value
@@ -393,12 +399,12 @@ void EVStateDependents::heaterCtrl()
       if ( m_pGPIO_heater->gpioSet(LOW) )
       {
         DBG_ERR_MSG("Heater GPIO set(LOW) failed!");
-        m_isHeaterOoS = TRUE;
+        m_isHeaterOoS = true;
       }
       else
       {
         DBG_OUT_MSG("HEATER: OFF");
-        m_isHeaterOn = FALSE;
+        m_isHeaterOn = false;
       }
     }
   }

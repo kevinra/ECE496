@@ -12,7 +12,8 @@
 #define COMPRESSNUPLOADSTATEFILE_HPP
 
 #include "common.hpp"
-#include "thread/Thread.hpp"
+#include "Thread.hpp"
+#include <curl/curl.h>
 
 class CompressNUploadStateFile: public Thread
 {
@@ -27,9 +28,9 @@ private:
   unsigned int m_num7ZipCreated;
   unsigned int m_numFileAdded;
 
-  is7zFile(char fileName[])
-  compressNUploadGroup(char fileListStr[]);
-  upload7zFile(char 7zName[])
+  bool is7zFile(char fileName[]);
+  void compressNUploadGroup(char fileListStr[]);
+  void upload7zFile(char name7z[]);
 };
 
 #endif // COMPRESSNUPLOADSTATEFILE_HPP

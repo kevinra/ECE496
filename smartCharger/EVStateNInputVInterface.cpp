@@ -15,15 +15,11 @@ EVStateNInputVInterface g_EVStateNInputVInterface;
 EVStateNInputVInterface::EVStateNInputVInterface()
 {
   m_inputVolt = inputV_dontCare;
-  m_isChargingHwErr = FALSE;
-  m_shouldFPGAOn = FALSE;
-  m_inputVoltMtx = NULL;
-  m_isChargingHWOoSMtx = NULL;
-  m_shouldFPGAOnMtx = NULL;
+  m_isChargingHWOoS = false;
+  m_shouldFPGAOn = false;
 }
 
-
-EVStateNInputVInterface::~EVStateNInputVInterface();
+EVStateNInputVInterface::~EVStateNInputVInterface()
 {
   pthread_mutex_destroy(&m_inputVoltMtx);
   pthread_mutex_destroy(&m_isChargingHWOoSMtx);
@@ -91,7 +87,7 @@ void EVStateNInputVInterface::setIsChargingHWOoS(bool isOoS)
 
 bool EVStateNInputVInterface::getShouldFPGAOn()
 {
-  pthread_mutex_lock(&m_shouldFPGAonMtx);
+  pthread_mutex_lock(&m_shouldFPGAOnMtx);
   bool shouldOn = m_shouldFPGAOn;
   pthread_mutex_unlock(&m_shouldFPGAOnMtx);
   return shouldOn;

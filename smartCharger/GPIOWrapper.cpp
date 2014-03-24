@@ -13,6 +13,7 @@
 
 #include "GPIOWrapper.hpp"
 #include <fcntl.h>
+#include <unistd.h>
 #include <poll.h>
 
 #define SYSFS_GPIO_DIR "/sys/class/gpio"
@@ -26,16 +27,16 @@ GPIOWrapper::GPIOWrapper()
 {
   m_gpioNum = 0;
   m_fd = 0;
-  m_isInputPin = TRUE;
-  m_isInterruptSetup = FALSE;
+  m_isInputPin = true;
+  m_isInterruptSetup = false;
 }
 
 GPIOWrapper::GPIOWrapper(int gpioNum)
 {
   m_gpioNum = gpioNum;
   m_fd = 0;
-  m_isInputPin = TRUE;
-  m_isInterruptSetup = FALSE;
+  m_isInputPin = true;
+  m_isInterruptSetup = false;
 }
 
 
@@ -74,25 +75,25 @@ int GPIOWrapper::init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking)
   fd = open(SYSFS_GPIO_DIR "/export", O_WRONLY);
   if (fd < 0)
   {
-    DBG_ERR_MSG("gpio/export file opening on pin " << m_gpioNum < "failed!");
+    DBG_ERR_MSG("gpio/export file opening on pin " << m_gpioNum << "failed!");
     return fd;
   }
   len = snprintf(buf, sizeof(buf), "%d", m_gpioNum);
   if (len < 0)
   {
-    DBG_ERR_MSG("gpio/export snprintf on pin" << m_gpioNum < "failed!");
+    DBG_ERR_MSG("gpio/export snprintf on pin" << m_gpioNum << "failed!");
     return len;
   }
   retVal = write(fd, buf, len);
   if (retVal < 0)
   {
-    DBG_ERR_MSG("gpio/export file writing on pin " << m_gpioNum < "failed!");
+    DBG_ERR_MSG("gpio/export file writing on pin " << m_gpioNum << "failed!");
     return retVal;
   }
-  revVal = close(fd);
+  retVal = close(fd);
   if (retVal < 0)
   {
-    DBG_ERR_MSG("gpio/export file closing on pin " << m_gpioNum < "failed!");
+    DBG_ERR_MSG("gpio/export file closing on pin " << m_gpioNum << "failed!");
     return retVal;
   }
  
@@ -103,19 +104,19 @@ int GPIOWrapper::init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking)
   len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR  "/gpio%d/direction", m_gpioNum);
   if (len < 0)
   {
-    DBG_ERR_MSG("gpio/direction snprintf on pin" << m_gpioNum < "failed!");
+    DBG_ERR_MSG("gpio/direction snprintf on pin" << m_gpioNum << "failed!");
     return len;
   }
   fd = open(buf, O_WRONLY);
   if (fd < 0)
   {
-    DBG_ERR_MSG("gpio/direction file opening on pin " << m_gpioNum < "failed!");
+    DBG_ERR_MSG("gpio/direction file opening on pin " << m_gpioNum << "failed!");
     return fd;
   }
   if (pinDir)
   {
     retVal = write(fd, "out", STRLEN_OUT);
-    m_isInputPin = FALSE;
+    m_isInputPin = false;
   }
   else
   {
@@ -123,13 +124,13 @@ int GPIOWrapper::init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking)
   }
   if (retVal < 0)
   {
-    DBG_ERR_MSG("gpio/direction file writing on pin " << m_gpioNum < "failed!");
+    DBG_ERR_MSG("gpio/direction file writing on pin " << m_gpioNum << "failed!");
     return retVal;
   }
-  revVal = close(fd);
+  retVal = close(fd);
   if (retVal < 0)
   {
-    DBG_ERR_MSG("gpio/direction file closing on pin " << m_gpioNum < "failed!");
+    DBG_ERR_MSG("gpio/direction file closing on pin " << m_gpioNum << "failed!");
     return retVal;
   }
 
@@ -140,29 +141,29 @@ int GPIOWrapper::init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking)
     len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/edge", m_gpioNum);
     if (len < 0)
     {
-      DBG_ERR_MSG("gpio/edge snprintf on pin" << m_gpioNum < "failed!");
+      DBG_ERR_MSG("gpio/edge snprintf on pin" << m_gpioNum << "failed!");
       return len;
     }
     fd = open(buf, O_WRONLY);
     if (fd < 0)
     {
-      DBG_ERR_MSG("gpio/edge file opening on pin " << m_gpioNum < "failed!");
+      DBG_ERR_MSG("gpio/edge file opening on pin " << m_gpioNum << "failed!");
       return fd;
     }
    
     retVal = write(fd, edge, strlen(edge) + 1);
     if (retVal < 0)
     {
-      DBG_ERR_MSG("gpio/edge file writing on pin " << m_gpioNum < "failed!");
+      DBG_ERR_MSG("gpio/edge file writing on pin " << m_gpioNum << "failed!");
       return retVal;
     }
     retVal = close(fd);
     if (retVal < 0)
     {
-      DBG_ERR_MSG("gpio/edge file closing on pin " << m_gpioNum < "failed!");
+      DBG_ERR_MSG("gpio/edge file closing on pin " << m_gpioNum << "failed!");
       return retVal;
     }
-    m_isInterruptSetup = TRUE;
+    m_isInterruptSetup = true;
   }
 
   // Open and save the file desriptor of the pin on memory
@@ -170,7 +171,7 @@ int GPIOWrapper::init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking)
   len = snprintf(buf, sizeof(buf), SYSFS_GPIO_DIR "/gpio%d/value", m_gpioNum);
   if (len < 0)
   {
-    DBG_ERR_MSG("gpio/value snprintf on pin" << m_gpioNum < "failed!");
+    DBG_ERR_MSG("gpio/value snprintf on pin" << m_gpioNum << "failed!");
     return len;
   }
   if (edge != NULL)
@@ -192,7 +193,7 @@ int GPIOWrapper::init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking)
   }
   if (fd < 0)
   {
-    DBG_ERR_MSG("gpio/value file opening on pin " << m_gpioNum < "failed!");
+    DBG_ERR_MSG("gpio/value file opening on pin " << m_gpioNum << "failed!");
     return fd;
   }
 
@@ -220,7 +221,7 @@ int GPIOWrapper::gpioSet(PIN_VALUE val)
   }
   if (retVal < 0)
   {
-    DBG_ERR_MSG("file writing on pin " << m_gpioNum < "failed!");
+    DBG_ERR_MSG("file writing on pin " << m_gpioNum << "failed!");
     return retVal;
   }
 
@@ -236,7 +237,7 @@ int GPIOWrapper::gpioGet(int* pValue)
   retVal = read(m_fd, &ch, 1);
   if (retVal < 0)
   {
-    DBG_ERR_MSG("File reading on pin " << m_gpioNum < "failed!");
+    DBG_ERR_MSG("File reading on pin " << m_gpioNum << "failed!");
     return retVal;
   }
 
@@ -250,12 +251,6 @@ int GPIOWrapper::gpioGet(int* pValue)
   }
 
   return 0;
-}
-
-
-int GPIOWrapper::getGPIOfd()
-{
-  return m_fd;
 }
 
 

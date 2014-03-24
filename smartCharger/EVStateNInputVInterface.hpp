@@ -13,14 +13,12 @@
 #include "GPIOWrapper.hpp"
 #include <pthread.h>
 
-extern EVStateNInputVInterface g_EVStateNInputVInterface;
-
 enum inputV
 {
   inputV_dontCare = 0,
   inputV_120V,
   inputV_240V
-}
+};
 
 class EVStateNInputVInterface
 {
@@ -29,7 +27,7 @@ public:
   ~EVStateNInputVInterface();
 
   int init();
-  int getInputVolt();
+  inputV getInputVolt();
   void setInputVolt(inputV iv);
   bool getIsChargingHWOoS();
   void setIsChargingHWOoS(bool isOoS);
@@ -38,7 +36,7 @@ public:
 
 private:
   inputV m_inputVolt;
-  bool m_isChargingHwErr;
+  bool m_isChargingHWOoS;
   bool m_shouldFPGAOn;
   pthread_mutex_t m_inputVoltMtx;
   pthread_mutex_t m_isChargingHWOoSMtx;
@@ -46,3 +44,6 @@ private:
 };
 
 #endif // EVStateNInputVInterface_HPP
+
+extern EVStateNInputVInterface g_EVStateNInputVInterface;
+
