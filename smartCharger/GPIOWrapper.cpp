@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <poll.h>
 
+#define MAX_BUF 64
 #define SYSFS_GPIO_DIR "/sys/class/gpio"
 #define POLL_TIMEOUT -1  // -1 means no timeout
 
@@ -64,11 +65,21 @@ int GPIOWrapper::init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking)
   int fd, len, retVal;
   char buf[MAX_BUF];
 
+  // If GPIO pin number is not initialized
+  if (m_gpioNum == 0)
+  {
+    DBG_ERR_MSG("GPIO pin number is not initialized!");
+    return -1;
+  }
   // Argument validity check: if edge is given, the pin must be in the input direction
   if (edge != NULL && pinDir != INPUT_PIN)
   {
     DBG_ERR_MSG("If edge is specified, pin direction cannot be output!");
     return -1;
+  }
+  if (pinDir == OUTPUT_PIN)
+  {
+    m_isInputPin = false;
   }
  
   // Export the pin
@@ -201,6 +212,16 @@ int GPIOWrapper::init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking)
   return 0;
 }
 
+/*
+int gpioFdOpen()
+{
+  if (m_gpioNum == 0)
+  {
+    DBG_ERR_MSG("GPIO pin number is not initialized");
+    return -1;
+  }
+}
+*/
 
 int GPIOWrapper::gpioSet(PIN_VALUE val)
 {
@@ -210,7 +231,6 @@ int GPIOWrapper::gpioSet(PIN_VALUE val)
     DBG_ERR_MSG("Cannot set GPIO value on input pin!");
     return -1;
   }
-
   if (val)
   {
     retVal = write(m_fd, "1", 2);
@@ -229,7 +249,7 @@ int GPIOWrapper::gpioSet(PIN_VALUE val)
 }
 
 // Not sure this will work properlly when file descriptor is opened with non-block option
-int GPIOWrapper::gpioGet(int* pValue)
+int GPIOWrapper::gpioRead(int* pValue)
 {
   int retVal;
   char ch;
@@ -240,7 +260,6 @@ int GPIOWrapper::gpioGet(int* pValue)
     DBG_ERR_MSG("File reading on pin " << m_gpioNum << "failed!");
     return retVal;
   }
-
   if (ch != '0')
   {
     *pValue = 1;
@@ -251,6 +270,12 @@ int GPIOWrapper::gpioGet(int* pValue)
   }
 
   return 0;
+}
+
+
+int GPIOWrapper::gpioGetFd()
+{
+  return m_fd;
 }
 
 

@@ -31,9 +31,14 @@ public:
   int init();
   int getCurDateNStateFile(chronoTP& pRawTime);
   int extractData();
+  // Acessor to extracted variables
+  #ifdef NOFPGA
+  int getCurrentFlow();
+  #endif
   #ifdef DEBUG
   void printExtractedAttribs();
   #endif
+  // Accessor to derived variables
   bool getIsParked();
   bool getIsFaultPresent();
   bool getIsSoCDecreased();
@@ -82,8 +87,8 @@ private:
   CURL* m_ftpHandle;
   struct FtpFile m_outFile;
 
-  char m_dateNtimeStr[STATEFILE_STRSIZE];
-  float m_timeDiff;
+  char m_stateFileName[STATEFILE_STRSIZE];
+  float m_timeDiff; // in ms 
   chronoTP m_tp_PrevTime;
 
   bool convertStrToBoolean(char strBoolean[]);

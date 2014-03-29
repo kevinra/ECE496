@@ -11,6 +11,8 @@
 #include "VehicleState.hpp"
 #include <string.h>
 
+#define FTP_DOWNLOAD_TIMEOUT 3L
+
 #define POS_SPEED 3
 #define POS_ESTOP 6
 #define POS_PBRAKE 7
@@ -96,12 +98,13 @@ int VehicleState::init()
     curl_easy_setopt(m_ftpHandle, CURLOPT_WRITEFUNCTION, VehicleState::my_fwrite);
 
     // Switch on full protocol/debug output
-    #ifdef DEBUG
-    curl_easy_setopt(m_ftpHandle, CURLOPT_VERBOSE, 1L);
-    #endif
+    // #ifdef DEBUG
+    // curl_easy_setopt(m_ftpHandle, CURLOPT_VERBOSE, 1L);
+    // #endif
 
     // Set a pointer to our struct to pass to the callback
     curl_easy_setopt(m_ftpHandle, CURLOPT_WRITEDATA, &m_outFile);
+    curl_easy_setopt(m_ftpHandle, CURLOPT_TIMEOUT, FTP_DOWNLOAD_TIMEOUT);
   }
   else
   {
@@ -118,13 +121,13 @@ int VehicleState::getCurDateNStateFile(chronoTP& rChronoTP_curTime)
   {
     return 1;
   }
-  m_outFile.fileName = m_dateNtimeStr;
+  m_outFile.fileName = m_stateFileName;
   m_outFile.stream = NULL;
 
   CURLcode curlRetv;
   if ( (curlRetv = curl_easy_perform(m_ftpHandle)) != CURLE_OK )
   {
-    DBG_ERR_MSG( "Getting state.json failed. curl told us " << curl_easy_strerror(curlRetv) );
+    DBG_ERR_MSG( "Getting state.json failed. curl says:\n" << curl_easy_strerror(curlRetv) );
     return 1;
   }
 
@@ -144,15 +147,21 @@ int VehicleState::getCurDateNStateFile(chronoTP& rChronoTP_curTime)
 
 int VehicleState::extractData()
 {
-  FILE *stateFile;
+  FILE* stateFile;
   char line[LINESIZE];
   m_tempMin = INITIALMINTEMPVAL;
   m_tempMax = INITIALMAXTEMPVAL;
 
-  stateFile = fopen(m_dateNtimeStr, "r");
+  char stateFileFullPath[STATEFILE_FULLPATHSIZE];
+  if ( snprintf(stateFileFullPath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", m_stateFileName) < 0)
+  {
+    DBG_ERR_MSG("snprintf of statefile full path failed!");
+    return -1;
+  }
+  stateFile = fopen(stateFileFullPath, "r");
   if(stateFile == NULL)
   {
-    DBG_ERR_MSG("Cannot open state.json file\n");
+    DBG_ERR_MSG("Cannot open downloaded state.json file!");
     return -1;
   }
 
@@ -306,42 +315,51 @@ int VehicleState::extractData()
 
   // Trapezoid area formula. Note that speed is in the unit of km/h and travelled distance
   // is in meters
-  m_travelledDist += (m_speedOld + m_speedCur) * m_timeDiff * 1000 / 7200;
+  m_travelledDist += (m_speedOld + m_speedCur) * m_timeDiff / 7200;
   return 0;
 }
+
+
+#ifdef NOFPGA
+int VehicleState::getCurrentFlow()
+{
+  return m_current;
+}
+#endif
 
 
 #ifdef DEBUG
 void VehicleState::printExtractedAttribs()
 {
-  std::cout << "m_speedOld:" << m_speedOld << std::endl;
-  std::cout << "m_speedCur:" << m_speedCur << std::endl;
-  std::cout << "m_eStop:" << m_eStop << std::endl;
-  std::cout << "m_pBrake:" << m_pBrake << std::endl;
-  std::cout << "m_soc:" << m_soc << std::endl;
-  std::cout << "m_vCellMin:" << m_vCellMin << std::endl;
-  std::cout << "m_vCellMax:" << m_vCellMax << std::endl;
-  std::cout << "m_current:" << m_current << std::endl;
-  std::cout << "m_tempMin:" << m_tempMin << std::endl;
-  std::cout << "m_tempMax:" << m_tempMax << std::endl;
-  std::cout << "m_gearPos:" << m_gearPos << std::endl;
-  std::cout << "m_accelPos:" << m_accelPos << std::endl;
-  std::cout << "m_prev_faultMap:" << m_prev_faultMap << std::endl;
-  std::cout << "m_faultMap:" << m_faultMap << std::endl;
-  std::cout << "m_prev_driveWarning:" << m_prev_driveWarning << std::endl;
-  std::cout << "m_driveWarning:" << m_driveWarning << std::endl;
-  std::cout << "m_prev_driveOverTemp:" << m_prev_driveOverTemp << std::endl;
-  std::cout << "m_driveOverTemp:" << m_driveOverTemp << std::endl;
-  std::cout << "m_prev_driveFault:" << m_prev_driveFault << std::endl;
-  std::cout << "m_driveFault:" << m_driveFault << std::endl;
+  std::cout << "<<" <<__func__ << "\n";
+  std::cout << "  m_speedOld:" << m_speedOld << "\n";
+  std::cout << "  m_speedCur:" << m_speedCur << "\n";
+  std::cout << "  m_eStop:" << m_eStop << "\n";
+  std::cout << "  m_pBrake:" << m_pBrake << "\n";
+  std::cout << "  m_soc:" << m_soc << "\n";
+  std::cout << "  m_vCellMin:" << m_vCellMin << "\n";
+  std::cout << "  m_vCellMax:" << m_vCellMax << "\n";
+  std::cout << "  m_current:" << m_current << "\n";
+  std::cout << "  m_tempMin:" << m_tempMin << "\n";
+  std::cout << "  m_tempMax:" << m_tempMax << "\n";
+  std::cout << "  m_gearPos:" << m_gearPos << "\n";
+  std::cout << "  m_accelPos:" << m_accelPos << "\n";
+  std::cout << "  m_prev_faultMap:" << m_prev_faultMap << "\n";
+  std::cout << "  m_faultMap:" << m_faultMap << "\n";
+  std::cout << "  m_prev_driveWarning:" << m_prev_driveWarning << "\n";
+  std::cout << "  m_driveWarning:" << m_driveWarning << "\n";
+  std::cout << "  m_prev_driveOverTemp:" << m_prev_driveOverTemp << "\n";
+  std::cout << "  m_driveOverTemp:" << m_driveOverTemp << "\n";
+  std::cout << "  m_prev_driveFault:" << m_prev_driveFault << "\n";
+  std::cout << "  m_driveFault:" << m_driveFault << "\n";
 
-  std::cout << "Printing derived variables." << std::endl;
+  std::cout << " derived variables." << "\n";
 
-  std::cout << "m_isParked:" << m_prev_driveOverTemp << std::endl;
-  std::cout << "m_isFaultPresent:" << m_driveOverTemp << std::endl;
-  std::cout << "m_isSoCDecreased:" << m_prev_driveFault << std::endl;
-  std::cout << "m_travelledDist:" << m_driveFault << std::endl;
-  std::cout << "m_timeDiff:" << m_timeDiff << std::endl;
+  std::cout << "  m_isParked:" << m_isParked << "\n";
+  std::cout << "  m_isFaultPresent:" << m_isFaultPresent << "\n";
+  std::cout << "  m_isSoCDecreased:" << m_isSoCDecreased << "\n";
+  std::cout << "  m_travelledDist:" << m_travelledDist << "\n";
+  std::cout << "  m_timeDiff:" << m_timeDiff << "\n";
   return;
 }
 #endif
@@ -373,21 +391,24 @@ float VehicleState::getTravelledDist()
 
 char* VehicleState::getStateFileName()
 {
-  return m_dateNtimeStr;
+  return m_stateFileName;
 }
 
 
 bool VehicleState::isDifferentError()
 {
+  bool retVal = false;
   if (m_prev_faultMap != m_faultMap)
-    return true;
-  if (m_prev_driveWarning != m_driveWarning)
-    return true;
-  if (m_prev_driveOverTemp != m_driveOverTemp)
-    return true;
-  if (m_prev_driveFault != m_driveFault)
-    return true;
-  return false;
+    retVal = true;
+  else if (m_prev_driveWarning != m_driveWarning)
+    retVal = true;
+  else if (m_prev_driveOverTemp != m_driveOverTemp)
+    retVal = true;
+  else if (m_prev_driveFault != m_driveFault)
+    retVal = true;
+
+  DBG_OUT_VAR(retVal);
+  return retVal;
 }
 
 
@@ -424,11 +445,11 @@ void VehicleState::resetTravelledDist()
 
 bool VehicleState::convertStrToBoolean(char strBoolean[])
 {
-  if ( strncmp(strBoolean, BOOLEANSTR_TRUE, BOOLSTRSIZE) )
+  if ( strncmp(strBoolean, BOOLEANSTR_TRUE, BOOLSTRSIZE) == 0)
   {
     return true;
   }
-  if ( strncmp(strBoolean, BOOLEANSTR_FALSE, BOOLSTRSIZE) )
+  if ( strncmp(strBoolean, BOOLEANSTR_FALSE, BOOLSTRSIZE) == 0)
   {
     return false;
   }
@@ -459,12 +480,14 @@ bool VehicleState::setCurrentTimeStr(chronoTP& rChronoTP_curTime)
 {
   using namespace std::chrono;
   rChronoTP_curTime = system_clock::now();
+  // m_timeDiff = duration<float, milliseconds::period> (rChronoTP_curTime - m_tp_PrevTime).count();
   m_timeDiff = duration<float, milliseconds::period> (rChronoTP_curTime - m_tp_PrevTime).count();
+  DBG_OUT_MSG("Time difference: " << m_timeDiff << "ms");
   std::time_t m_tt_curTime = system_clock::to_time_t(rChronoTP_curTime);
   struct std::tm* pTimeInfo = std::localtime(&m_tt_curTime);
   m_tp_PrevTime = rChronoTP_curTime;
 
-  if ( snprintf(m_dateNtimeStr, STATEFILE_STRSIZE, "%d%.2d%.2d_%.2d%.2d%.2d_%f.txt", 
+  if ( snprintf(m_stateFileName, STATEFILE_STRSIZE, "%d%.2d%.2d_%.2d%.2d%.2d_%f.txt", 
                 pTimeInfo->tm_year + 1900, pTimeInfo->tm_mon + 1, pTimeInfo->tm_mday, 
                 pTimeInfo->tm_hour, pTimeInfo->tm_min, pTimeInfo->tm_sec, m_timeDiff) < 0)
   {

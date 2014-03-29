@@ -12,6 +12,7 @@
 
 #include "common.hpp"
 #include "Thread.hpp"
+#include "GPIOWrapper.hpp"
 
 class InputVoltDependents: public Thread
 {
@@ -19,29 +20,23 @@ public:
   InputVoltDependents();
   ~InputVoltDependents();
   int init();
-  int recNBatRelayOn();
-  int recNBatRelayOff();
   void* run();
 
 private:
   // Members
-	bool m_isInputVMeterOoS;
-  I2CWrapper* m_pI2C_inputVMeter;
-  GPIOWrapper* m_pGPIO_fpgaInterrupt;
+  bool m_isInputVMeterOoS;
   GPIOWrapper* m_pGPIO_rec1PfEn;
-  GPIOWrapper* m_pGPIO_rec2PfEn;
   GPIOWrapper* m_pGPIO_rec1LdEn;
-  GPIOWrapper* m_pGPIO_rec2LdEn;
   GPIOWrapper* m_pGPIO_rec1PFM;
-  GPIOWrapper* m_pGPIO_rec2PFM;
-  GPIOWrapper* m_pGPIO_batRelay;
+  GPIOWrapper* m_pGPIO_bIn_fOut_2;
+  GPIOWrapper* m_pGPIO_bIn_fOut_1;
+  GPIOWrapper* m_pGPIO_bIn_fOut_0;
 
   // Methods
+  int recNBatRelayOn();
+  int recNBatRelayOff();
   bool isBothLdEnReady();
-  int processInputVMeter();
-  inputV translateInputV();
-  void handlePFM();
+  void waitForInterrupt();
 };
-
 
 #endif // INPUTVOLTDEPENDENTS_HPP

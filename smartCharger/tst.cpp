@@ -1,57 +1,26 @@
+#include <cstdarg>
 #include <iostream>
-#include <iomanip>
-#include <chrono>
-#include <ctime>
-#include <thread>
 
-#ifdef DEBUG
-  #define DBG_OUT_VAR(var) \
-    std::cout << "DBG: " << __FILE__ << "(" << __LINE__ << ")::"\
-         << __func__ << "> " << #var << " = [" << (var) << "]" << std::endl
-  #define DBG_ERR_VAR(var) \
-    std::cerr << "DBG: " << __FILE__ << "(" << __LINE__ << ") "\
-         << #var << " = [" << (var) << "]" << std::endl
-  #define DBG_OUT_MSG(msg) \
-    std::cout << "DBG: " << __FILE__ << "(" << __LINE__ << ") " \
-         << msg << std::endl
-  #define DBG_ERR_MSG(msg) \
-    std::cerr << "DBG: " << __FILE__ << "(" << __LINE__ << ") " \
-         << msg << std::endl
-#else
-  #define DBG_OUT_VAR(var)
-  #define DBG_ERR_VAR(var)
-  #define DBG_OUT_MSG(msg)
-  #define DBG_ERR_MSG(msg)
-#endif
+using namespace std;
 
-void timed_piece_of_code() 
+// this function will take the number of values to average
+// followed by all of the numbers to average
+double average ( int num, ... )
 {
-    std::chrono::seconds simulated_work(2);
-    std::this_thread::sleep_for(simulated_work);
-}
+  va_list arguments;                     // A place to store the list of arguments
+  double sum = 0;
 
+  va_start ( arguments, num );           // Initializing arguments to store all values after num
+  for ( int x = 0; x < num; x++ )        // Loop until all numbers are added
+    sum += va_arg ( arguments, double ); // Adds the next value in argument list to sum.
+  va_end ( arguments );                  // Cleans up the list
+
+  return sum / num;                      // Returns the average
+}
 int main()
 {
-  std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-  std::time_t now_c = std::chrono::system_clock::to_time_t( now );
-  std::cout << "One day ago, the time was "
-            << std::put_time(std::localtime(&now_c), "%F %T") << '\n';
-
-
-  std::cout << "Hello World\n";
-  timed_piece_of_code();
-  std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
-
-  // std::chrono::duration<float, std::chrono::milliseconds::period> diffT = std::chrono::duration<float, std::chrono::milliseconds::period> (end - now);
-  std::chrono::duration<float> diffT = std::chrono::duration<float, std::chrono::milliseconds::period> (end - now);
-
-  std::cout << "Printing took "
-            << std::chrono::duration_cast<std::chrono::microseconds>(end - now).count()
-            << std::endl
-            << diffT.count()
-            // << std::chrono::duration<float, std::chrono::milliseconds::period> (end - now).count()
-            << "seconds.\n";
-
-	return 0;
+    // this computes the average of 13.2, 22.3 and 4.5 (3 indicates the number of values to average)
+  cout<< average ( 3, 12.2, 22.3, 4.5 ) <<endl;
+    // here it computes the average of the 5 values 3.3, 2.2, 1.1, 5.5 and 3.3
+  cout<< average ( 5, 3.3, 2.2, 1.1, 5.5, 3.3 ) <<endl;
 }
-

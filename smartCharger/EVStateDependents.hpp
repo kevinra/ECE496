@@ -13,18 +13,7 @@
 #include "VehicleState.hpp"
 #include "common.hpp"
 #include "Thread.hpp"
-
-// #define NORMAL 0
-// #define PREHEAT 1
-// #define PREHEATINGTEMPADJUSTMENT
-
-// enum heaterState
-// {
-//   S0_IDLE = 0,
-//   S1_QUERIEDTEMP,
-//   S2_GOT_TEMP,
-//   S3_TEMPLIMIT_RAISED
-// }
+#include "GPIOWrapper.hpp"
 
 enum vclMvmState
 {
@@ -50,31 +39,20 @@ private:
   float m_lastTravelledDist;
   float m_distPerSoC;
   bool m_isFaultFromStateFile;
-  // I2CWrapper* m_pI2C_fpga;
-
-  // GPIOWrapper* m_pGPIO_heater;
-  // heaterState m_heaterState;
-  // bool m_isHeaterOoS;
-  // bool m_isHeaterOn;
-  // int m_tempthrshld1;
-  // int m_tempthrshld2;
-  // time_t m_lastTempQueryTime;
+  GPIOWrapper* m_pGPIO_bOut_fIn_2;
+  GPIOWrapper* m_pGPIO_bOut_fIn_1;
+  GPIOWrapper* m_pGPIO_bOut_fIn_0;
 
   // m_nextDrivingTime;
   chronoTP m_tp_curTime;
 
   // methods
   void vclmvmRecordHandle();
-  // void fpgaCtrl();
+  void fpgaCtrl();
   void piggybackInfoNRenameFileWithVclMvm();
   int sqlFindCorrespRowID();
   static int selectCallback(void* data, int argc, char **argv, char **azColName);
   void sqlUpdateCorrespRowID(float td);
-
-  /*
-  void heaterCtrl();
-  void setTempLvl(int isPreHeat);
-  */
 };
 
 #endif // EVSTATEDEPENDENTS_HPP

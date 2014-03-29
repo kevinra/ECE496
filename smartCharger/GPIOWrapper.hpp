@@ -21,8 +21,8 @@
 
 enum PIN_VALUE
 {
-	LOW = 0,
-	HIGH = 1
+  LOW = 0,
+  HIGH = 1
 };
 
 enum PIN_DIRECTION{
@@ -40,7 +40,8 @@ public:
   void setGPIONum(int gpioNum);
   int init(PIN_DIRECTION pinDir, char* edge, bool isNonBlocking);
   int gpioSet(PIN_VALUE val);
-  int gpioGet(int* pValue);
+  int gpioRead(int* pValue);
+  int gpioGetFd();
   int gpioWaitForInterrupt();
 
 private:

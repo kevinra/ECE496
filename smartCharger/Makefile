@@ -9,11 +9,13 @@ CC = g++
 CFLAGS = -O2 -c
 
 LDFLAGS = -L/usr/local/lib
-LIBS = -lcurl -lcrypto -lsqlite3
+LIBS = -lcurl -lcrypto -lsqlite3 -lpthread
 
 all: $(TARGET)
-debug: CFLAGS += -DDEBUG -g 
+debug: CFLAGS += -DDEBUG -g
 debug: $(TARGET)
+debug_nofpga: CFLAGS += -DDEBUG -DNOFPGA -g
+debug_nofpga: $(TARGET)
 
 # Link the target with all objects and libraries
 $(TARGET): $(OBJS)

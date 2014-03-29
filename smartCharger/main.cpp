@@ -8,7 +8,7 @@ int main()
 {
   if ( g_EVStateNInputVInterface.init() )
   {
-    ERR_MSG("global object g_EVStateNInputVInterface initialization failed!");
+    ERR_MSG("Global object for evState and inputV interface failed!");
     return 1;
   }
 
@@ -41,9 +41,12 @@ int main()
 
   evdThread.start();
   // ivdThread.start();
-  cnuThread.start();
+  // cnuThread.start();
 
-	curl_global_cleanup();
-	return 0;
-	
+  evdThread.join();
+  // ivdThread.join();
+  // cnuThread.join();
+
+  curl_global_cleanup();
+  return 0;
 }
