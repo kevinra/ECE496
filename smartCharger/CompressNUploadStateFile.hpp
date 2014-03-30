@@ -13,6 +13,7 @@
 
 #include "common.hpp"
 #include "Thread.hpp"
+#include <string>
 #include <curl/curl.h>
 
 enum cmdMode
@@ -31,13 +32,13 @@ public:
 
 private:
   CURL* m_curl;
-  unsigned int m_num7ZipCreated;
+  unsigned int m_numTarCreated;
   unsigned int m_numFileAdded;
 
-  bool is7zFile(char fileName[]);
-  void compressNUploadGroup(char fileListStr[]);
-  void upload7zFile(char name7z[]);
-  void forkNRunCmd(cmdMode cm, char arg1[], char arg2[]);
+  bool isTarFile(char fileName[]);
+  void compressNUploadGroup(std::string fileNameArry[]);
+  void uploadTarBall(char nameTarBall[]);
+  int forkNRunCmd(cmdMode cm, char arg1[], std::string arg2[]);
 };
 
 #endif // COMPRESSNUPLOADSTATEFILE_HPP

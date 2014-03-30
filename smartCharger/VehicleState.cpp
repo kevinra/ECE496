@@ -7,11 +7,12 @@
   
 */
 
-
 #include "VehicleState.hpp"
 #include <string.h>
 
 #define FTP_DOWNLOAD_TIMEOUT 3L
+// #define STATEFILE_URL "http://192.168.3.201/cgi-bin/state.json"
+#define STATEFILE_URL "http://" SERVERURL "state.json"
 
 #define POS_SPEED 3
 #define POS_ESTOP 6
@@ -91,8 +92,7 @@ int VehicleState::init()
     // curl_easy_setopt(m_ftpHandle, CURLOPT_URL,
     //                  "http://192.168.3.201/cgi-bin/state.json");
 
-    curl_easy_setopt(m_ftpHandle, CURLOPT_URL,
-                     "http://smartcharger.zapto.org/state.json");
+    curl_easy_setopt(m_ftpHandle, CURLOPT_URL, STATEFILE_URL);
 
     // Define our callback to get called when there's data to be written
     curl_easy_setopt(m_ftpHandle, CURLOPT_WRITEFUNCTION, VehicleState::my_fwrite);

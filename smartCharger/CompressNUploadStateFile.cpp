@@ -10,23 +10,21 @@
 #include "CompressNUploadStateFile.hpp"
 #include <dirent.h>
 #include <unistd.h>
-#include <string.h>
 #include <signal.h>
 
 #define FTP_UPLOAD_TIMEOUT 3
-#define BINARYLOCATION_7ZIP "/usr/local/bin/7za"
+#define BINARYLOCATION_TAR "/usr/bin/tar"
 #define BINARYLOCATION_RM "/bin/rm"
-#define SERVER_BASEURL "ftp://smdev:uoft@smartcharger.zapto.org/stateFiles/"
-#define COMPRESSEDFILE_PREFIX "7zcomp_"
+#define SERVER_BASEURL "ftp://smdev:uoft@" SERVERURL "state/"
+#define COMPRESSEDFILE_PREFIX "tarBall_"
 #define SIZE_COMPRESSGROUP 5 // Number of state files grouped together and compressed
-#define SIZE_COMPRESSFILELISTSTR SIZE_COMPRESSGROUP * STATEFILE_FULLPATHSIZE
 #define SIZE_UPLOADURLSTR 70
 #define EXTENSIONOFFSET_7Z 3
 
 CompressNUploadStateFile::CompressNUploadStateFile()
 {
   m_curl = NULL;
-  m_num7ZipCreated = 0;
+  m_numTarCreated = 0;
   m_numFileAdded = 0;
 }
 
@@ -56,44 +54,49 @@ int CompressNUploadStateFile::init()
 
 void* CompressNUploadStateFile::run()
 {
-  while(1)
-  {
+  // while(1)
+  // {
+    DBG_OUT_MSG("Sweeping " << STATEFILE_LOCATION);
+
     DIR* dir;
     struct dirent* ent;
-    m_num7ZipCreated = 0;
+    m_numTarCreated = 0;
     m_numFileAdded = 0;
 
     if ( (dir = opendir(STATEFILE_LOCATION)) != NULL )
     {
-      char fileListStr[SIZE_COMPRESSFILELISTSTR];
-      memset(fileListStr, 0, SIZE_COMPRESSFILELISTSTR);
+      std::string fileNameArry[SIZE_COMPRESSGROUP];
       while ( (ent = readdir(dir)) != NULL )
       {
+        DBG_OUT_MSG("Current file:" << ent->d_name);
         // A file that is currently used by vehicleState does not
         // start with 'S'
         if (*(ent->d_name) == 'S')
         {
-          // Compress the group of files with 7zip and upload
+          DBG_OUT_MSG("Piggybacked statefile found.");
+          // Compress the group of files into tar ball and upload
           if (m_numFileAdded == SIZE_COMPRESSGROUP)
           {
-            compressNUploadGroup(fileListStr);
+            DBG_OUT_MSG("Number of files waiting for compression reached threshold.");
+            compressNUploadGroup(fileNameArry);
           }
-          else
-          {
-            char filePath[STATEFILE_FULLPATHSIZE];
-            snprintf(filePath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", ent->d_name);
-            strncat(fileListStr, filePath, STATEFILE_FULLPATHSIZE);
-          }
+          DBG_OUT_MSG("Current file is added to the list.");
+          char filePath[STATEFILE_FULLPATHSIZE];
+          snprintf(filePath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", ent->d_name);
+          fileNameArry[m_numFileAdded] = filePath;
+          m_numFileAdded++;
         }
-        else if ( is7zFile(ent->d_name) )
+        else if ( *(ent->d_name) != '.' && isTarFile(ent->d_name) )
         {
-          upload7zFile(ent->d_name);
+          DBG_OUT_MSG("Tar ball found, which is not uploaded yet.");
+          uploadTarBall(ent->d_name);
         }
       }
       // Upload remaining not-yet uploaded file
       if (m_numFileAdded != 0)
       {
-        compressNUploadGroup(fileListStr);
+        DBG_OUT_MSG("Uploading remaining files.");
+        compressNUploadGroup(fileNameArry);
       }
       closedir(dir);
     }
@@ -103,7 +106,7 @@ void* CompressNUploadStateFile::run()
     }
     
     DBG_OUT_MSG("Scanning state file location done.");
-  }
+  // }
   return NULL;
 }
 
@@ -111,19 +114,19 @@ void* CompressNUploadStateFile::run()
 // Note: 7Zip files will be removed if uploading was successful.
 // There is little chance that the uploading is failed so whenever
 // we found *.7z file in the directory, just directly upload it.
-bool CompressNUploadStateFile::is7zFile(char fileName[])
+bool CompressNUploadStateFile::isTarFile(char fileName[])
 {
-  char ext7z[] = ".7z";
+  char extTar[] = ".tar";
   int i_2 = 0;
   for (int i_1 = 0; fileName[i_1] != '\0'; i_1++)
   {
-    if (fileName[i_1] == ext7z[i_2])
+    if (fileName[i_1] == extTar[i_2])
     {
       i_1++;
       i_2++;
-      while(fileName[i_1] != '\0' && ext7z[i_2] != '\0')
+      while(fileName[i_1] != '\0' && extTar[i_2] != '\0')
       {
-        if (fileName[i_1] != ext7z[i_2])
+        if (fileName[i_1] != extTar[i_2])
         {
           return false;
         }
@@ -139,45 +142,54 @@ bool CompressNUploadStateFile::is7zFile(char fileName[])
 
 // Note that this deletes state files and compressed file if 
 // successfully uploaded.
-void CompressNUploadStateFile::compressNUploadGroup(char fileListStr[])
+void CompressNUploadStateFile::compressNUploadGroup(std::string fileNameArry[])
 {
-  char name7z[STATEFILE_STRSIZE];
+  char nameTarBall[STATEFILE_STRSIZE];
   char compressOutArg[STATEFILE_FULLPATHSIZE]; // Not exactly this size but whatever
-  snprintf(name7z, STATEFILE_STRSIZE, COMPRESSEDFILE_PREFIX "%d.7z", m_num7ZipCreated);
-  snprintf(compressOutArg, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", name7z);
+  snprintf(nameTarBall, STATEFILE_STRSIZE, COMPRESSEDFILE_PREFIX "%d.tar.gz", m_numTarCreated);
+  snprintf(compressOutArg, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", nameTarBall);
 
-  int retVal = forkNRunCmd(CM_COMPRESS, compressOutArg, fileListStr);
+  int retVal = forkNRunCmd(CM_COMPRESS, compressOutArg, fileNameArry);
   m_numFileAdded = 0;
   if (retVal)
   {
-    // In case incorrect 7z file is generated, remove it
+    // In case incorrect tar ball is generated, remove it
     forkNRunCmd(CM_REMOVE, compressOutArg, NULL);
-    memset(fileListStr, 0, SIZE_COMPRESSFILELISTSTR);
-    ERR_MSG("7Zip compression failed!");
+    // Flush the fileNameArry
+    for (int i = 0; i < SIZE_COMPRESSGROUP; i++)
+    {
+      fileNameArry[i].clear();
+    }
     return;
   }
-  m_num7ZipCreated++;
-  upload7zFile(name7z);
+  m_numTarCreated++;
+  uploadTarBall(nameTarBall);
 
   // Remove state files that are contained in the 
   // uploaded compressed file
-  forkNRunCmd(CM_REMOVE, fileListStr, NULL);
-  memset(fileListStr, 0, SIZE_COMPRESSFILELISTSTR);
+  forkNRunCmd(CM_REMOVE, NULL, fileNameArry);
+  // Flush the fileNameArry
+  for (int i = 0; i < SIZE_COMPRESSGROUP; i++)
+  {
+    fileNameArry[i].clear();
+  }
   return;
 }
 
 
-// Note: it deletes .7z file if upload is successful
-void CompressNUploadStateFile::upload7zFile(char name7z[])
+// Note: it deletes .tar.gz file if upload is successful
+void CompressNUploadStateFile::uploadTarBall(char nameTarBall[])
 {
-  char file_7zPath[STATEFILE_FULLPATHSIZE]; // the size of this has nothing to do with state file string size really
+  char file_TarBallPath[STATEFILE_FULLPATHSIZE]; // the size of this has nothing to do with state file string size really
   char uploadURL[SIZE_UPLOADURLSTR];
-  snprintf(file_7zPath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", name7z);
-  snprintf(uploadURL, SIZE_UPLOADURLSTR, SERVER_BASEURL "%s", name7z);
-  FILE* hd_src = fopen(file_7zPath, "rb");
+  snprintf(file_TarBallPath, STATEFILE_FULLPATHSIZE, STATEFILE_LOCATION "%s", nameTarBall);
+  snprintf(uploadURL, SIZE_UPLOADURLSTR, SERVER_BASEURL "%s", nameTarBall);
+  DBG_OUT_MSG(file_TarBallPath << " will be uploaded to " << uploadURL);
+
+  FILE* hd_src = fopen(file_TarBallPath, "rb");
   if (hd_src == NULL)
   {
-    ERR_MSG("Opening compressed file(" << file_7zPath << ") failed!");
+    ERR_MSG("Opening tar ball(" << file_TarBallPath << ") failed!");
     return;
   }
   curl_easy_setopt(m_curl, CURLOPT_URL, uploadURL);
@@ -186,41 +198,89 @@ void CompressNUploadStateFile::upload7zFile(char name7z[])
   CURLcode res = curl_easy_perform(m_curl);
   if(res != CURLE_OK)
   {
-    ERR_MSG("Compressed file uploading failed!\ncurl says:\n" << curl_easy_strerror(res) );
+    ERR_MSG("Tar ball uploading failed!\ncurl says:\n" << curl_easy_strerror(res) );
     return;
   }
 
-  // Remove 7z file
-  forkNRunCmd(CM_REMOVE, file_7zPath, NULL);
+  // Remove the tar ball
+  forkNRunCmd(CM_REMOVE, file_TarBallPath, NULL);
   fclose(hd_src);
   return;
 }
 
-int CompressNUploadStateFile::forkNRunCmd(cmdMode cm, char arg1[], char arg2[])
+int CompressNUploadStateFile::forkNRunCmd(cmdMode cm, char arg1[], std::string arg2[])
 {
   pid_t pID = fork();
   if (pID == 0) // Child process
   {
     if (cm == CM_REMOVE)
     {
-      // If exec is successful, it would not return a value, it will trigger the if statement
-      // only if there is some error. However, not all the errors are handled by this.
-      if ( execl(BINARYLOCATION_RM, BINARYLOCATION_RM, arg1, NULL) )
+      // If exec is successful, it would not return a value.
+      // If statements are triggered only if there is some error.
+      // However, not all the errors are handled by this.
+      
+      if (arg2 == NULL) // only single file should be removed.
       {
-        ERR_MSG("rm command to remove" << arg1 << "failed!");
+        DBG_OUT_MSG("Will remove " << arg1);
+        if ( execl(BINARYLOCATION_RM, BINARYLOCATION_RM, arg1, NULL) )
+        {
+          ERR_MSG("rm command to remove" << arg1 << "failed!");
+          exit(1);
+        } 
+      }
+      else if (arg1 == NULL) // List of files that should be removed.
+      {
+        DBG_OUT_MSG("Will remove following files:\n" << 
+                    arg2[0].c_str() << "\n" <<
+                    arg2[1].c_str() << "\n" <<
+                    arg2[2].c_str() << "\n" <<
+                    arg2[3].c_str() << "\n" <<
+                    arg2[4].c_str()
+                   );
+
+        if ( execl(BINARYLOCATION_RM, BINARYLOCATION_RM,
+             arg2[0].c_str(), arg2[1].c_str(), arg2[2].c_str(), arg2[3].c_str(), arg2[4].c_str(),
+             NULL) )
+        {
+          ERR_MSG("rm command to remove following files failed!\n" <<
+                  arg2[0].c_str() << "\n" <<
+                  arg2[1].c_str() << "\n" <<
+                  arg2[2].c_str() << "\n" <<
+                  arg2[3].c_str() << "\n" <<
+                  arg2[4].c_str()
+                 );
+          exit(1);
+        }
+      }
+      else
+      {
+        ERR_MSG("Cannot proceed rm commmand\nNeither of arg1 nor arg2 are supplied!");
         exit(1);
       }
     }
     else if (cm == CM_COMPRESS)
     {
-      if (arg2 == NULL) // Seconc argument must be presented
+      if (arg2 == NULL) // Second argument must be presented
       {
-        ERR_MSG("Second argument for 7z compress command is NULL!");
+        ERR_MSG("Second argument for tar compression command is NULL!");
         exit(1);
       }
-      if ( execl(BINARYLOCATION_7ZIP, BINARYLOCATION_7ZIP, "a", "-mx=9", arg1, arg2, NULL) )
+      DBG_OUT_MSG("Following files will be compressed into " << 
+                  arg1 << ":\n" <<
+                  arg2[0].c_str() << "\n" <<
+                  arg2[1].c_str() << "\n" <<
+                  arg2[2].c_str() << "\n" <<
+                  arg2[3].c_str() << "\n" <<
+                  arg2[4].c_str()
+                 );
+
+      if ( execl(BINARYLOCATION_TAR, BINARYLOCATION_TAR, "-cpzf", arg1,
+           arg2[0].c_str(), arg2[1].c_str(), arg2[2].c_str(), arg2[3].c_str(), arg2[4].c_str(),
+           NULL) )
       {
-        ERR_MSG("7z compress command failed!");
+        // For now, cannot find a way to pass less than SIZE_COMPRESSGROUP
+        // without triggering the error output
+        ERR_MSG("tar ball compress command failed!");
         exit(1);
       }
     }
@@ -248,5 +308,6 @@ int CompressNUploadStateFile::forkNRunCmd(cmdMode cm, char arg1[], char arg2[])
   int childRetVal;
   waitpid(pID, &childRetVal, 0);
   kill(pID, SIGINT);
-  return WEXITSTATUS(childRetVal);
+  // return WEXITSTATUS(childRetVal); // For future improvement
+  return 0;
 }

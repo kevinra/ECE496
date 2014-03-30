@@ -39,13 +39,13 @@ int main()
     return 1;
   }
 
-  evdThread.start();
   // ivdThread.start();
-  // cnuThread.start();
+  // evdThread.start();
+  cnuThread.start();
 
-  evdThread.join();
   // ivdThread.join();
-  // cnuThread.join();
+  // evdThread.join();
+  cnuThread.join();
 
   curl_global_cleanup();
   return 0;
