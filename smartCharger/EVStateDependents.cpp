@@ -195,6 +195,231 @@ void EVStateDependents::fpgaCtrl()
 }
 
 
+//code for input current calculation
+/*
+	Need the following values from somewhere
+
+	int currentTime; //from somewhere** 24-hr clock with hour, no minutes
+	int nextDrivingTime; //from somewhere** 24-hr clock with hour, no minutes	
+	
+	int dayNextDrivingTime; //from somewhere** day of the next driving time
+	int dayCurrentTime; //from somewhere** day of the current time
+	
+	int SOC_remaining; //from somewhere** remaining SOC value in %	
+*/
+int EVStateDependents::calculateInputCurrent()
+{
+	int zeroCurrent = 0; //no current
+	int trickleCurrent = 1; //trickle charge
+	int maxCurrent = 8; //in number of phases
+	
+	int currentPricingPhase;
+	int drivingPricingPhase;
+	int lowPricing = 72; //price during low
+	int medPricing = 109; //price during med
+	int highPricing = 129; //price during high
+	
+	int currentTime; //from somewhere** 24-hr clock with hour, no minutes
+	int nextDrivingTime; //from somewhere** 24-hr clock with hour, no minutes
+	
+	//determining price at current time
+	if (currentTime >= 0 || currentTime < 7) {currentPricingPhase = 1;} //first low phase
+	else if (currentTime >= 7 || currentTime < 11) {currentPricingPhase = 2;} //first med phase
+	else if (currentTime >= 11 || currentTime < 17) {currentPricingPhase = 3;} //high phase
+	else if (currentTime >= 17 || currentTime < 19) {currentPricingPhase = 4;} //second med phase
+	else if (currentTime >= 19 || currentTime < 24) {currentPricingPhase = 5;} //second low phase
+	
+	//determining price at next driving time
+	if (nextDrivingTime >= 0 || nextDrivingTime < 7) {drivingPricingPhase = 1;} //first low phase
+	else if (nextDrivingTime >= 7 || nextDrivingTime < 11) {drivingPricingPhase = 2;} //first med phase
+	else if (nextDrivingTime >= 11 || nextDrivingTime < 17) {drivingPricingPhase = 3;} //high phase
+	else if (nextDrivingTime >= 17 || nextDrivingTime < 19) {drivingPricingPhase = 4;} //second med phase
+	else if (nextDrivingTime >= 19 || nextDrivingTime < 24) {drivingPricingPhase = 5;} //second low phase
+	
+	int dayNextDrivingTime; //from somewhere** day of the next driving time
+	int dayCurrentTime; //from somewhere** day of the current time
+	
+	int chargingTime = nextDrivingTime + 24 * (dayNextDrivingTime - dayCurrentTime) - currentTime; //total charging hours
+	
+	int low_chargingTime; //hours remaining until next driving cycle
+	int med_chargingTime; //hours remaining until next driving cycle
+	int hi_chargingTime; //hours remaining until next driving cycle
+	
+	//determining charging time we have
+	if (dayNextDrivingTime == dayCurrentTime) //if next driving time is today
+	{
+		if (drivingPricingPhase == 1 && currentPricingPhase = 1)
+		{
+			low_chargingTime = nextDrivingTime - currentTime;
+			med_chargingTime = 0;
+			hi_chargingTime = 0;
+		}
+		else if (drivingPricingPhase == 2 && currentPricingPhase = 1)
+		{
+			low_chargingTime = 7 - currentTime;
+			med_chargingTime = nextDrivingTime - 7;
+			hi_chargingTime = 0;
+		}
+		else if (drivingPricingPhase == 2 && currentPricingPhase = 2)
+		{
+			low_chargingTime = 0;
+			med_chargingTime = nextDrivingTime - currentTime;
+			hi_chargingTime = 0;
+		}
+		else if (drivingPricingPhase == 3 && currentPricingPhase = 1)
+		{
+			low_chargingTime = 7 - currentTime;
+			med_chargingTime = 11 - 7;
+			hi_chargingTime = nextDrivingTime - 11;
+		}
+		else if (drivingPricingPhase == 3 && currentPricingPhase = 2)
+		{
+			low_chargingTime = 0;
+			med_chargingTime = 11 - currentTime;
+			hi_chargingTime = nextDrivingTime - 11;
+		}
+		else if (drivingPricingPhase == 3 && currentPricingPhase = 3)
+		{
+			low_chargingTime = 0;
+			med_chargingTime = 0;
+			hi_chargingTime = nextDrivingTime - currentTime;
+		}
+		else if (drivingPricingPhase == 4 && currentPricingPhase = 1)
+		{
+			low_chargingTime = 7 - currentTime;
+			med_chargingTime = 11 - 7 + nextDrivingTime - 17;
+			hi_chargingTime = 17 - 11;
+		}
+		else if (drivingPricingPhase == 4 && currentPricingPhase = 2)
+		{
+			low_chargingTime = 0;
+			med_chargingTime = 11 - currentTime + nextDrivingTime - 17;
+			hi_chargingTime = 17 - 11;
+		}
+		else if (drivingPricingPhase == 4 && currentPricingPhase = 3)
+		{
+			low_chargingTime = 0;
+			med_chargingTime = nextDrivingTime - 17;
+			hi_chargingTime = 17 - currentTime;
+		}
+		else if (drivingPricingPhase == 4 && currentPricingPhase = 4)
+		{
+			low_chargingTime = 0;
+			med_chargingTime = nextDrivingTime - currentTime;
+			hi_chargingTime = 0;
+		}
+		else if (drivingPricingPhase == 5 && currentPricingPhase = 1)
+		{
+			low_chargingTime = 7 - currentTime + nextDrivingTime - 19;
+			med_chargingTime = 19 - 17 + 11 - 7;
+			hi_chargingTime = 17 - 11;
+		}
+		else if (drivingPricingPhase == 5 && currentPricingPhase = 2)
+		{
+			low_chargingTime = nextDrivingTime - 19;
+			med_chargingTime = 19 - 17 + 11 - currentTime;
+			hi_chargingTime = 17 - 11;
+		}
+		else if (drivingPricingPhase == 5 && currentPricingPhase = 3)
+		{
+			low_chargingTime = nextDrivingTime - 19;
+			med_chargingTime = 19 - 17;
+			hi_chargingTime = 17 - currentTime;
+		}
+		else if (drivingPricingPhase == 5 && currentPricingPhase = 4)
+		{
+			low_chargingTime = nextDrivingTime - 19;
+			med_chargingTime = 19 - currentTime;
+			hi_chargingTime = 0;
+		}
+		else if (drivingPricingPhase == 5 && currentPricingPhase = 5)
+		{
+			low_chargingTime = nextDrivingTime - currentTime;
+			med_chargingTime = 0;
+			hi_chargingTime = 0;
+		}
+	}
+	else if (dayNextDrivingTime > dayCurrentTime) //if next driving time is not today
+	{
+		if (drivingPricingPhase == 1 && currentPricingPhase = 5)
+		{
+			low_chargingTime = 24 - currentTime + 7 - nextDrivingTime;
+			med_chargingTime = 0;
+			hi_chargingTime = 0;
+		}
+		else
+		{
+			low_chargingTime = 8;
+			med_chargingTime = 0;
+			hi_chargingTime = 0;
+		}
+	}
+		
+	double idealCurrent;
+	double idealCurrentL;
+	double idealCurrentM;
+	double idealCurrentH;
+	
+	int inputCurrentL = 0; //input current during low price phases
+	int inputCurrentM = 0; //input current during medium price phases
+	int inputCurrentH = 0; //input current during high price phases
+	
+	int SOC_90 = 90; //90% SOC value
+	int SOC_remaining; //from somewhere** remaining SOC value in %
+	
+	//determining the ideal current for full charge
+	if (low_chargingTime != 0)
+	{
+		idealCurrentL = (((SOC_90 - SOC_remaining) * 110) / low_chargingTime) / 1.2;
+		//SOC's in %, 110 in Amp*hour (110 is full charge capacity), 1.2 in Amp, therefore idealCurrent in # of phases
+	}
+		
+	//determining the ideal current including the price of electricity
+	if (idealCurrentL > maxCurrent) //must charge at full power regardless of price
+	{
+		inputCurrentL = maxCurrent;
+		if (med_chargingTime != 0)
+		{
+			idealCurrentM = ((((SOC_90 - SOC_remaining) * 110) - (low_chargingTime * inputCurrentL * 1.2)) / med_chargingTime) / 1.2;
+			if (idealCurrentM > maxCurrent)
+			{
+				inputCurrentM = maxCurrent;
+				if (hi_chargingTime != 0)
+				{
+					idealCurrentH = ((((SOC_90 - SOC_remaining) * 110) - (low_chargingTime * inputCurrentL * 1.2) - (med_chargingTime * inputCurrentM * 1.2) / hi_chargingTime) / 1.2;
+					if (idealCurrentH > maxCurrent)	
+					{
+						inputCurrentH = maxCurrent;
+					}
+					else 
+					{
+						inputCurrentH = idealCurrentH;
+					}
+				}
+			}
+		}
+	} else {inputCurrentL = idealCurrentL;}
+	
+	if (SOC_remaining =< 90)
+	{
+		if (currentPricingPhase == 1 || currentPricingPhase == 5)
+			return inputCurrentL;
+		else if (currentPricingPhase == 2 || currentPricingPhase == 4)
+			return inputCurrentM;
+		else if (currentPricingPhase ==3)
+			return inputCurrentH;
+	}
+	else if (SOC_remaining > 90 && SOC_remaining < 95)
+	{
+		return trickleCurrent;
+	}
+	else if (SOC_remaining >= 95)
+	{
+		return zeroCurrent;
+	}	
+}
+
+
 void EVStateDependents::piggybackInfoNRenameFileWithVclMvm()
 {
   // Piggyback derived information into state file.

@@ -49,6 +49,7 @@ private:
   // methods
   void vclmvmRecordHandle();
   void fpgaCtrl();
+  int calculateInputCurrent();
   void piggybackInfoNRenameFileWithVclMvm();
   int sqlFindCorrespRowID();
   static int selectCallback(void* data, int argc, char **argv, char **azColName);
