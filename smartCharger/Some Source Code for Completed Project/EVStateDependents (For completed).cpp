@@ -123,7 +123,7 @@ void EVStateDependents::vclmvmRecordHandle()
   {
     case S0_PARKED_NOT_CHARGING:
       DBG_OUT_MSG("VM Record State: S0_PARKED_NOT_CHARGING");
-      if (g_EVStateNInputVInterface.getShouldFPGAOn() )
+      if (g_EVStateNInputVInterface.getShouldLLCOn() )
       {
         m_vmState = S1_PARKED_CHARGING;
       }
@@ -137,7 +137,7 @@ void EVStateDependents::vclmvmRecordHandle()
       break;
     case S1_PARKED_CHARGING:
       DBG_OUT_MSG("VM Record State: S1_PARKED_CHARGING");
-      if ( !g_EVStateNInputVInterface.getShouldFPGAOn() || m_isFaultFromStateFile)
+      if ( !g_EVStateNInputVInterface.getShouldLLCOn() || m_isFaultFromStateFile)
       {
         m_vmState = S1_PARKED_CHARGING;
       }
@@ -181,7 +181,7 @@ void EVStateDependents::vclmvmRecordHandle()
 // received any signals for 1 second.
 void EVStateDependents::fpgaCtrl()
 {
-  if ( !g_EVStateNInputVInterface.getShouldFPGAOn() ||
+  if ( !g_EVStateNInputVInterface.getShouldLLCOn() ||
        m_isFaultFromStateFile ||
        g_EVStateNInputVInterface.getIsChargingHWOoS()
      )
@@ -338,7 +338,7 @@ void EVStateDependents::heaterCtrl()
   {
     case S0_IDLE:
       DBG_OUT_MSG("HeaterState: S0");
-      if ( g_EVStateNInputVInterface.getShouldFPGAOn() )
+      if ( g_EVStateNInputVInterface.getShouldLLCOn() )
       {
         // If temperature data is outdated
         if (g_currentDate - m_lastTempQueryTime > TEMPQUERYINTERVAL)
@@ -360,14 +360,14 @@ void EVStateDependents::heaterCtrl()
         m_lastTempQueryTime = g_currentDate;
         m_heaterState = S2;
       }
-      else if (! g_EVStateNInputVInterface.getShouldFPGAOn() )
+      else if (! g_EVStateNInputVInterface.getShouldLLCOn() )
       {
         m_heaterState = S0;
       }
       break;
     case S2_GOT_TEMP:
       DBG_OUT_MSG("HeaterState: S2");
-      if (! g_EVStateNInputVInterface.getShouldFPGAOn() )
+      if (! g_EVStateNInputVInterface.getShouldLLCOn() )
       {
         m_heaterState = S0;
       }
@@ -379,7 +379,7 @@ void EVStateDependents::heaterCtrl()
       break;
     case S3_TEMPLIMIT_RAISED:
       DBG_OUT_MSG("HeaterState: S3");
-      if (! g_EVStateNInputVInterface.getShouldFPGAOn() )
+      if (! g_EVStateNInputVInterface.getShouldLLCOn() )
       {
         setTempLevel(NORMAL);
         m_heaterState = S0;
@@ -390,7 +390,7 @@ void EVStateDependents::heaterCtrl()
       DBG_ERR_MSG("Unknown heater State!");
   }
 
-  if ( g_EVStateNInputVInterface.getShouldFPGAOn() ) // charging mode
+  if ( g_EVStateNInputVInterface.getShouldLLCOn() ) // charging mode
   {
     if ( !m_isHeaterOn && m_pVS_evState->getMinTemp() < TEMPTHRSHLD_1 )
     {

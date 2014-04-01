@@ -1,6 +1,6 @@
 #include "EVStateNInputVInterface.hpp"
 #include "EVStateDependents.hpp"
-// #include "InputVoltDependents.hpp"
+#include "InputVoltDependents.hpp"
 #include "CompressNUploadStateFile.hpp"
 #include <curl/curl.h>
 
@@ -12,7 +12,7 @@ int main()
     return 1;
   }
 
-  // InputVoltDependents ivdThread;
+  InputVoltDependents ivdThread;
   EVStateDependents evdThread;
   CompressNUploadStateFile cnuThread;
 
@@ -40,11 +40,11 @@ int main()
   }
 
   // ivdThread.start();
-  // evdThread.start();
+  evdThread.start();
   cnuThread.start();
 
   // ivdThread.join();
-  // evdThread.join();
+  evdThread.join();
   cnuThread.join();
 
   curl_global_cleanup();

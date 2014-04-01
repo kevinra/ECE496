@@ -20,6 +20,7 @@
 #define SIZE_COMPRESSGROUP 5 // Number of state files grouped together and compressed
 #define SIZE_UPLOADURLSTR 70
 #define EXTENSIONOFFSET_7Z 3
+#define SLEEPPRD 10
 
 CompressNUploadStateFile::CompressNUploadStateFile()
 {
@@ -54,13 +55,12 @@ int CompressNUploadStateFile::init()
 
 void* CompressNUploadStateFile::run()
 {
-  // while(1)
-  // {
+  while(1)
+  {
     DBG_OUT_MSG("Sweeping " << STATEFILE_LOCATION);
 
     DIR* dir;
     struct dirent* ent;
-    m_numTarCreated = 0;
     m_numFileAdded = 0;
 
     if ( (dir = opendir(STATEFILE_LOCATION)) != NULL )
@@ -106,7 +106,8 @@ void* CompressNUploadStateFile::run()
     }
     
     DBG_OUT_MSG("Scanning state file location done.");
-  // }
+    sleep(SLEEPPRD);
+  }
   return NULL;
 }
 
@@ -153,6 +154,7 @@ void CompressNUploadStateFile::compressNUploadGroup(std::string fileNameArry[])
   m_numFileAdded = 0;
   if (retVal)
   {
+    ERR_MSG("Compression Failed!");
     // In case incorrect tar ball is generated, remove it
     forkNRunCmd(CM_REMOVE, compressOutArg, NULL);
     // Flush the fileNameArry

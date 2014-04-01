@@ -181,7 +181,7 @@ int VehicleState::extractData()
       case POS_SPEED:
         sscanf(line, "\t\t\"%[^:]:%d", attribute, &value);
         m_speedOld = m_speedCur;
-        m_speedCur = value / 100;
+        m_speedCur = value;
         break;
       case POS_ESTOP:
         sscanf(line, "\t\t\"%[^:]:%s", attribute, boolStr);
@@ -292,7 +292,8 @@ int VehicleState::extractData()
 
   fclose(stateFile);
 
-  if (m_pBrake == true && m_speedCur == 0 && m_gearPos == GEARPOS_NEUTRAL && m_accelPos == 0)
+  if (m_eStop == true && m_pBrake == true && m_speedCur == 0 &&
+      m_gearPos == GEARPOS_NEUTRAL && m_accelPos == 0)
   {
     DBG_OUT_MSG("Vehicle is currently parked.");
     m_isParked = true;
@@ -320,7 +321,7 @@ int VehicleState::extractData()
 }
 
 
-#ifdef NOFPGA
+#ifdef NO_RECT
 int VehicleState::getCurrentFlow()
 {
   return m_current;
@@ -365,6 +366,11 @@ void VehicleState::printExtractedAttribs()
 #endif
 
 
+int VehicleState::getSoC()
+{
+  return m_soc;
+}
+
 bool VehicleState::getIsParked()
 {
   return m_isParked;
@@ -395,16 +401,16 @@ char* VehicleState::getStateFileName()
 }
 
 
-bool VehicleState::isDifferentError()
+bool VehicleState::isNewError()
 {
   bool retVal = false;
-  if (m_prev_faultMap != m_faultMap)
+  if (m_prev_faultMap != m_faultMap && m_prev_faultMap == false)
     retVal = true;
-  else if (m_prev_driveWarning != m_driveWarning)
+  else if (m_prev_driveWarning != m_driveWarning && m_prev_driveWarning == false)
     retVal = true;
-  else if (m_prev_driveOverTemp != m_driveOverTemp)
+  else if (m_prev_driveOverTemp != m_driveOverTemp && m_prev_driveOverTemp == false)
     retVal = true;
-  else if (m_prev_driveFault != m_driveFault)
+  else if (m_prev_driveFault != m_driveFault && m_prev_driveFault == false)
     retVal = true;
 
   DBG_OUT_VAR(retVal);

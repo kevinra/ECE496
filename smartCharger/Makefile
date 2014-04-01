@@ -1,5 +1,5 @@
 TARGET = smchr
-SOURCES =  main.cpp CompressNUploadStateFile.cpp EVStateDependents.cpp EVStateNInputVInterface.cpp GPIOWrapper.cpp VehicleState.cpp Thread.cpp
+SOURCES =  CompressNUploadStateFile.cpp EVStateDependents.cpp EVStateNInputVInterface.cpp GPIOWrapper.cpp InputVoltDependents.cpp main.cpp VehicleState.cpp Thread.cpp
 OBJS = $(SOURCES:.cpp=.o)
 
 # What compiler to use
@@ -12,10 +12,19 @@ LDFLAGS = -L/usr/local/lib
 LIBS = -lcurl -lcrypto -lsqlite3 -lpthread
 
 all: $(TARGET)
-debug: CFLAGS += -DDEBUG -g
+debug: CFLAGS += -DDEBUG -DBBB-g
 debug: $(TARGET)
-debug_nofpga: CFLAGS += -DDEBUG -DNOFPGA -g
-debug_nofpga: $(TARGET)
+# When LLC will never be turned on due to lack of rectifiers.
+debug_noRect: CFLAGS += -DDEBUG -DBBB -DNO_RECT -g
+debug_noRect: $(TARGET)
+# When input current to the FPGA has to vary in order to show 
+# controllable input current behavior on the battery load.
+debug_simInCur: CFLAGS += -DDEBUG -DBBB -DSIM_IN_CUR -g
+debug_simInCur: $(TARGET)
+# Debugging on OSX platform
+debug_osx: CFLAGS += -DDEBUG -DNO_RECT -g
+debug_osx: $(TARGET)
+
 
 # Link the target with all objects and libraries
 $(TARGET): $(OBJS)
