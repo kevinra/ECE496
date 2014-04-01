@@ -1,0 +1,1567 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"STATEFILE",
+				"STATEFILE_URL"
+			],
+			[
+				"m_vm",
+				"m_vmRowID"
+			],
+			[
+				"DB",
+				"DBG_OUT_VAR"
+			],
+			[
+				"DBG",
+				"DBG_ERR_MSG"
+			],
+			[
+				"m_",
+				"m_gpioNum"
+			],
+			[
+				"err",
+				"errorStr"
+			],
+			[
+				"dbg",
+				"DBG_OUT_MSG"
+			],
+			[
+				"statefe",
+				"stateFileFullPath"
+			],
+			[
+				"statef",
+				"STATEFILE_FULLPATHSIZE"
+			],
+			[
+				"ST",
+				"STATEFILE_FULLPATHSIZE"
+			],
+			[
+				"state",
+				"stateFileFullPath"
+			],
+			[
+				"Statefil",
+				"stateFileFullPath"
+			],
+			[
+				"m_prev_dr",
+				"m_prev_driveWarning"
+			],
+			[
+				"curl",
+				"curlRetv"
+			],
+			[
+				"L",
+				"LD_Enable"
+			],
+			[
+				"m_p",
+				"m_pVS_evState"
+			],
+			[
+				"origF",
+				"origFilePath"
+			],
+			[
+				"m_ev",
+				"m_pVS_evState"
+			],
+			[
+				"ch",
+				"chrono"
+			],
+			[
+				"chrono",
+				"chronoTP"
+			],
+			[
+				"new",
+				"newFilePath"
+			],
+			[
+				"orig",
+				"origFilePath"
+			],
+			[
+				"STate",
+				"STATEFILE_LOCATION"
+			],
+			[
+				"g_",
+				"g_EVStateNUploaderInterface"
+			],
+			[
+				"S2",
+				"S2_CRUSING"
+			],
+			[
+				"file",
+				"fileName"
+			],
+			[
+				"SIZE",
+				"SIZE_COMPRESSFILELISTSTR"
+			],
+			[
+				"num",
+				"num7ZipCreated"
+			],
+			[
+				"comp",
+				"COMPRESSEDFILE_PREFIX"
+			],
+			[
+				"S",
+				"STATEFILESTRSIZE"
+			],
+			[
+				"size",
+				"SIZE_COMPRESSFILELISTSTR"
+			],
+			[
+				"COMPR",
+				"SIZE_COMPRESSGROUP"
+			],
+			[
+				"TEMP",
+				"TEMP_2"
+			],
+			[
+				"S1_",
+				"S1_PARKED_CHARGING"
+			],
+			[
+				"s1",
+				"S1_PARKED_CHARGING"
+			],
+			[
+				"vcl",
+				"vclmvmRecordHandle"
+			],
+			[
+				"S0",
+				"S0_PARKED_NOT_CHARGING"
+			],
+			[
+				"vl",
+				"vclmvmState"
+			],
+			[
+				"retn",
+				"recNBatRelayOff"
+			],
+			[
+				"ini",
+				"initialization"
+			],
+			[
+				"IV",
+				"ivThread"
+			],
+			[
+				"GPIO_REC1",
+				"GPIO_REC1_PFM"
+			],
+			[
+				"set",
+				"setIsChargingHWErr"
+			],
+			[
+				"nfds_",
+				"NFDS_LDENABLE"
+			],
+			[
+				"NF",
+				"NFDS_FPGAINTERRUPT"
+			],
+			[
+				"NFD",
+				"NFDS_LDENABLE"
+			],
+			[
+				"rec",
+				"rec1_LdEn"
+			],
+			[
+				"m_rec",
+				"m_rec1LdEnGPIO"
+			],
+			[
+				"GPIOW",
+				"GPIOWrapper"
+			],
+			[
+				"INPUT",
+				"INPUTVOLT_120VRANGE_2"
+			],
+			[
+				"read",
+				"readVal"
+			],
+			[
+				"str",
+				"strToBeUploaded"
+			],
+			[
+				"Rect",
+				"RectNBatRelayCtrl"
+			],
+			[
+				"REC1",
+				"GPIO_REC1_PF_ENABLE"
+			],
+			[
+				"Rec",
+				"Rectifier_1"
+			],
+			[
+				"m_isErr",
+				"m_isErrorFromStateFileMtx"
+			],
+			[
+				"m_isE",
+				"m_isErrorFromStateFileMtx"
+			],
+			[
+				"m_isVo",
+				"m_isVoltmeterOoSMtx"
+			],
+			[
+				"m_inputVolt",
+				"m_inputVoltMtx"
+			],
+			[
+				"compress",
+				"CompressNUploadStateFile"
+			],
+			[
+				"EVSt",
+				"EVStateDependents"
+			],
+			[
+				"IN",
+				"INPUTVOLTMETERUPPERBOUND"
+			],
+			[
+				"rec2",
+				"rec2PFM"
+			],
+			[
+				"rec1",
+				"rec1PFM"
+			],
+			[
+				"INP",
+				"INPUT_PIN"
+			],
+			[
+				"POLL",
+				"POLL_TIMEOUT"
+			],
+			[
+				"m_is",
+				"m_isInputPin"
+			],
+			[
+				"is",
+				"isNonBlocking"
+			],
+			[
+				"pin",
+				"pinDir"
+			],
+			[
+				"STR",
+				"STRLEN_IN"
+			],
+			[
+				"STRLEN",
+				"STRLEN_OUT"
+			],
+			[
+				"ret",
+				"retVal"
+			],
+			[
+				"gpio",
+				"gpioNum"
+			],
+			[
+				"GPIO_REC",
+				"GPIO_REC2_PFM"
+			],
+			[
+				"GPIO_REC2",
+				"GPIO_REC2_LD_ENABLE"
+			],
+			[
+				"Input",
+				"InputVoltDependents"
+			],
+			[
+				"RE",
+				"RectNBatRelayCtrl"
+			],
+			[
+				"REC",
+				"REC1_PFM"
+			],
+			[
+				"REC1_",
+				"REC1_LD_Enable"
+			],
+			[
+				"data",
+				"dataToBeUploaded"
+			],
+			[
+				"par",
+				"parsedData"
+			],
+			[
+				"con",
+				"ConcurrentHashMap"
+			],
+			[
+				"ex",
+				"exchange"
+			],
+			[
+				"packet",
+				"packetFromClient"
+			],
+			[
+				"LOCA",
+				"locations"
+			],
+			[
+				"PACK",
+				"packetFromServer"
+			],
+			[
+				"Bo",
+				"BrokerPacket"
+			],
+			[
+				"pack",
+				"packetFromServer"
+			],
+			[
+				"brokerH",
+				"brokerHash"
+			],
+			[
+				"bo",
+				"broker"
+			],
+			[
+				"b",
+				"broker_host"
+			],
+			[
+				"close",
+				"closeBrokerStreamsNSocket"
+			],
+			[
+				"de",
+				"delims"
+			],
+			[
+				"th",
+				"throws"
+			],
+			[
+				"na",
+				"nameServer_hostName"
+			],
+			[
+				"pa",
+				"parseInt"
+			],
+			[
+				"n",
+				"null"
+			],
+			[
+				"sat",
+				"startsWith"
+			],
+			[
+				"name",
+				"nameServer_inStream"
+			],
+			[
+				"rre",
+				"returnVal"
+			],
+			[
+				"temp",
+				"tempFile"
+			],
+			[
+				"nas",
+				"nasdaqTemp"
+			],
+			[
+				"sym",
+				"symbol"
+			],
+			[
+				"Quo",
+				"QUOTE_UPPERBOUND"
+			],
+			[
+				"quot",
+				"quoteVal"
+			],
+			[
+				"packe",
+				"packetFromClient"
+			],
+			[
+				"ERR",
+				"ERROR_HANDLE_EXCHANGE_QUOTE_DNE"
+			],
+			[
+				"ERROR",
+				"ERROR_HANDLE_EXCHANGE_QUOTE_DNE"
+			],
+			[
+				"sy",
+				"symbol"
+			],
+			[
+				"FILE",
+				"FileWriter"
+			],
+			[
+				"Buff",
+				"BufferedWriter"
+			],
+			[
+				"symbol",
+				"symbol_remove"
+			],
+			[
+				"user",
+				"userInput"
+			],
+			[
+				"ERRo",
+				"ERROR_HANDLE_EXCHANGE_QUOTE_EXISTS"
+			],
+			[
+				"return",
+				"returnVal"
+			],
+			[
+				"print",
+				"printStackTrace"
+			],
+			[
+				"reutr",
+				"returnVal"
+			],
+			[
+				"pri",
+				"private"
+			],
+			[
+				"quote",
+				"quote_add"
+			],
+			[
+				"q",
+				"quote"
+			],
+			[
+				"get",
+				"getQuote"
+			],
+			[
+				"EX",
+				"EXCHANGE_REPLY"
+			],
+			[
+				"EXHA",
+				"EXCHANGE_REPLY"
+			],
+			[
+				"quo",
+				"quoteVal"
+			],
+			[
+				"ha",
+				"handleExchange"
+			],
+			[
+				"hand",
+				"handleClient"
+			],
+			[
+				"BROKER",
+				"BROKER_NULL"
+			],
+			[
+				"Ex",
+				"EXCHANGE_REMOVE"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "EVStateDependents.cpp",
+			"settings":
+			{
+				"buffer_size": 8640,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "VehicleState.cpp",
+			"settings":
+			{
+				"buffer_size": 12603,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "main.cpp",
+			"settings":
+			{
+				"buffer_size": 1135,
+				"line_ending": "Unix",
+				"name": "<main>"
+			}
+		},
+		{
+			"file": "EVStateDependents.hpp",
+			"settings":
+			{
+				"buffer_size": 1144,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "VehicleState.hpp",
+			"settings":
+			{
+				"buffer_size": 1988,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "InputVoltDependents.hpp",
+			"settings":
+			{
+				"buffer_size": 818,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "GPIOWrapper.cpp",
+			"settings":
+			{
+				"buffer_size": 6500,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "EVStateNInputVInterface.cpp",
+			"settings":
+			{
+				"buffer_size": 2205,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "common.hpp",
+			"settings":
+			{
+				"buffer_size": 1991,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Makefile",
+			"settings":
+			{
+				"buffer_size": 727,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "GPIOWrapper.hpp",
+			"settings":
+			{
+				"buffer_size": 938,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "EVStateNInputVInterface.hpp",
+			"settings":
+			{
+				"buffer_size": 935,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "To Impement",
+			"settings":
+			{
+				"buffer_size": 798,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "notes",
+			"settings":
+			{
+				"buffer_size": 897,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 281.0,
+		"selected_items":
+		[
+			[
+				"Package Control: ",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: in",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 457.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"sublime.executable_path()"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/KRa/Desktop/dev/smartCharger/VehicleState.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/InputVoltDependents.hpp",
+		"/Users/KRa/Desktop/dev/smartCharger/InputVoltDependents.cpp",
+		"/Users/KRa/mount_BBB.sh",
+		"/Users/KRa/Desktop/dev/smartCharger/Makefile",
+		"/Users/KRa/Desktop/dev/state.json",
+		"/Users/KRa/Desktop/dev/smartCharger/EVStateDependents.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/CompressNUploadStateFile.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/RectNBatRelayCtrl copy.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/notes",
+		"/Users/KRa/Desktop/dev/smartCharger/EVStateNUploaderInterface.hpp",
+		"/Users/KRa/Desktop/dev/smartCharger/EVStateNUploaderInterface.cpp",
+		"/Users/KRa/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/Users/KRa/Library/Application Support/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/Users/KRa/Documents/My Courses/ECE496/state copy.json",
+		"/Users/KRa/Desktop/dev/smartCharger/GPIOWrapper.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/EVStateDependetns.hpp",
+		"/Users/KRa/Desktop/dev/smartCharger/EVStateNInputVInterface.hpp",
+		"/Users/KRa/Desktop/dev/smartCharger/RectNBatRelayCtrl.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/RectNBatRelayCtrl.hpp",
+		"/Users/KRa/Desktop/dev/smartCharger/RectNBatRelayCtrl copy.hpp",
+		"/Users/KRa/Desktop/dev/smartCharger/CompressNUploadStateFile.hpp",
+		"/Users/KRa/Desktop/dev/smartCharger/VehicleState.hpp",
+		"/Users/KRa/Desktop/dev/smartCharger/GPIOWrapper.hpp",
+		"/Users/KRa/Desktop/dev/smartCharger/SimpleGPIO.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/CompressNuploadStateFile.hpp",
+		"/Users/KRa/Desktop/dev/smartCharger/CompressNuploadStateFile.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/threads/Thread.cpp",
+		"/Users/KRa/Library/Application Support/Sublime Text 3/Packages/User/Plain text.sublime-settings",
+		"/Users/KRa/Desktop/dev/smartCharger/VehicleState.h",
+		"/Users/KRa/Desktop/dev/smartCharger/CompressNuploadStateFile.h",
+		"/Users/KRa/Desktop/dev/smartCharger/common.h",
+		"/Users/KRa/Desktop/dev/smartCharger/InputVoltDependents.h",
+		"/Users/KRa/Desktop/dev/smartCharger/EVStateDependetns.h",
+		"/Users/KRa/Desktop/dev/smartCharger/highLevel.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/NonBlockingExample.cpp/classes.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/NonBlockingExample.cpp/main.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/logic",
+		"/Users/KRa/Desktop/dev/smartCharger/rectifiers.h",
+		"/Users/KRa/Desktop/dev/smartCharger/logic2",
+		"/Users/KRa/Documents/My Courses/ECE496/state.json",
+		"/Users/KRa/Desktop/dev/smartCharger/SimpleGPIO.h",
+		"/Users/KRa/Desktop/dev/smartCharger/BMA180Accelerometer.h",
+		"/Users/KRa/Desktop/dev/smartCharger/BMA180Accelerometer.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/EasyDriver.h",
+		"/Users/KRa/Desktop/dev/smartCharger/EasyDriver.cpp",
+		"/Users/KRa/Desktop/dev/smartCharger/TestApplication.cpp",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/MazeListener.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/Mazewar.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/SortedMultiSet.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/Cell.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/Client.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/ClientEvent.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/DirectedPoint.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/Direction.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/GUIClient.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/ClientListener.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/LocalClient.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/Maze.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/MazeImpl.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/OverheadMazePanel.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/Point.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/Projectile.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/RemoteClient.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/RobotClient.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/ScoreTableModel.java",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/run.sh",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/Makefile.dep",
+		"/Users/KRa/mount_ug222/ece419/lab2/mazewar/Makefile",
+		"/private/etc/sshd_config",
+		"/Users/KRa/Documents/My Courses/CSC343/CSC343_2011/a1/A1.tex",
+		"/Users/KRa/Desktop/dev/BBB_Samples/I2c/SimpleGPIO.h",
+		"/Users/KRa/Desktop/dev/BBB_Samples/I2c/BMA180Accelerometer.h",
+		"/Users/KRa/Desktop/dev/BBB_Samples/I2c/BMA180Accelerometer.cpp",
+		"/Users/KRa/Desktop/dev/BBB_Samples/I2c/EasyDriver.cpp",
+		"/Users/KRa/Desktop/dev/BBB_Samples/I2c/EasyDriver.h",
+		"/Users/KRa/Desktop/dev/BBB_Samples/I2c/SimpleGPIO.cpp",
+		"/Users/KRa/Desktop/dev/BBB_Samples/I2c/TestApplication.cpp",
+		"/Users/KRa/mount_BBB/options",
+		"/Users/KRa/mount_BBB/peers/wind",
+		"/Users/KRa/mount_BBB/peers/wind_v1",
+		"/Users/KRa/mount_BBB/peers/chat.connect",
+		"/Users/KRa/mount_BBB/peers/chat_v1.connect",
+		"/Users/KRa/mount_BBB/peers/chat.disconnect",
+		"/Users/KRa/mount_kraWS/etc/ppp/peers/pptp",
+		"/Users/KRa/mount_kraWS/etc/ppp/peers/ppp",
+		"/Users/KRa/mount_kraWS/etc/ppp/peers/pppoe-rp",
+		"/Users/KRa/mount_kraWS/etc/ppp/peers/pppoe",
+		"/Users/KRa/mount_kraWS/etc/ppp/peers/pppoatm",
+		"/Users/KRa/mount_kraWS/etc/ppp/chap-secrets",
+		"/Users/KRa/mount_kraWS/etc/wvdial.conf",
+		"/Users/KRa/mount_BBB/peers/chat_orig.connect",
+		"/Users/KRa/unMount_kraWS.sh",
+		"/Users/KRa/mount_BBB/wind",
+		"/Users/KRa/mount_BBB/chat.disconnect",
+		"/Users/KRa/mount_BBB/chat.connect",
+		"/Users/KRa/mount_BBB/provider",
+		"/Users/KRa/mount_BBB/d.txt",
+		"/Users/KRa/mount_BBB/chat_0.connect",
+		"/Users/KRa/mount_BBB/provider_0",
+		"/Users/KRa/mount_BBB/provider1",
+		"/Users/KRa/mount_kraWS.sh",
+		"/Users/KRa/Desktop/netcfg-ppp-mobile-git/netcfg-ppp-mobile.install",
+		"/Users/KRa/.ssh/known_hosts",
+		"/Users/KRa/mount_ug222/ece419/lab1/README",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/ConnectionWrapper.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/NamingService.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/BrokerPacket.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/Makefile",
+		"/Users/KRa/mount_ug222/ece419/lab1/part2/BrokerExchange.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/tse",
+		"/Users/KRa/mount_ug222/ece419/lab1/part2/OnlineBrokerHandlerThread.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/OnlineBrokerHandlerThread.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/BrokerExchange.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/BrokerLookupServerThread.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/OnlineBroker.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/BrokerLookupServer.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/BrokerClient.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/part3/nasdaq",
+		"/Users/KRa/mount_ug222/ece419/lab1/echo/EchoClient.java",
+		"/Users/KRa/mount_ug222/ece419/lab1/broker/broker3/tse",
+		"/Users/KRa/mount_ug222/ece419/lab1/broker/broker3/nasdaq",
+		"/Users/KRa/mount_ug222/ece419/lab1/broker/broker3/server.sh",
+		"/Users/KRa/mount_ug222/ece419/lab1/broker/broker3/Makefile",
+		"/Users/KRa/mount_ug222/ece419/lab1/broker/broker3/lookup.sh",
+		"/Users/KRa/mount_ug222/ece419/lab1/broker/broker3/exchange.sh",
+		"/Users/KRa/mount_ug222/ece419/lab1/broker/broker3/client.sh",
+		"/Users/KRa/mount_ug222/ece419/lab1/broker/broker3/BrokerPacket.java"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			"/Users/KRa/Desktop/dev/smartCharger",
+			"/Users/KRa/mount_ug222/ece419/lab2/mazewar",
+			"/Users/KRa/mount_ug222/ece419/lab1/part2",
+			"/Users/KRa/Desktop/dev/RegistrationForm-master/source",
+			"/Users/KRa/Desktop/modified",
+			"/Users/KRa/Documents/My Courses/ECE454/Lab1 SRC"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"evdThread",
+			"cnuThread",
+			"evdThread",
+			"cnuThread",
+			"evdThread",
+			"m_current",
+			"m_dateNtimeStr",
+			"g_EVStateNInputVInterface",
+			"gpioGet",
+			"delete",
+			"m_pGPIO_bOutfIn_",
+			"MAX_BUF",
+			"recNBatRelayOn",
+			"GPIO_BBB_OUT_FPGA_IN_",
+			";",
+			"m_pGPIO_bOut_fIn",
+			"fIn",
+			"Out",
+			"BBB_IN",
+			"in",
+			"IN",
+			"FPGA_IN",
+			"in",
+			"IN",
+			"OUT",
+			"m_",
+			"rec2",
+			"REC2",
+			"rec2",
+			"REC2",
+			"rec2",
+			"start",
+			"recNBatRelayOn",
+			"<iostream>",
+			"return",
+			"if",
+			"cout",
+			"m_",
+			"strncmp",
+			"BOOLEANSTR_TRUE",
+			";\n",
+			"convertStrToBoolean",
+			"std::endl",
+			"execl",
+			"duration<float",
+			"DBG_OUT_MSG",
+			"GEARPOS_NEUTRAL",
+			"isSoCDe",
+			"m_driveOvertemp",
+			"errStr",
+			"m_prev_driverFault",
+			"m_driverFault",
+			"m_driveFault",
+			"%d",
+			"setCurrentTimeStr",
+			"getGPIOfd",
+			"m_fd",
+			"getGPIOfd",
+			"revVal",
+			"failed",
+			"m_isChargingHWOoS",
+			"m_isChargingHwErr",
+			"g_EVStateNInputVInterface",
+			"();\n",
+			"g_EVStateNInputVInterface",
+			"m_distPerSoc",
+			"FALSE",
+			"TRUE",
+			"#include \"InputVoltDependents.hpp\"",
+			"m_outFile",
+			"common.h",
+			"double",
+			"m_distPerSoc",
+			"ios",
+			"piggybackInfoNRenameFileWithVclMvm",
+			"renameFileWithVclMvm",
+			"g_EVStateNUploaderInterface",
+			"renameFileWithVclMvm",
+			"m_distPerSoc",
+			"double",
+			"m_isParked",
+			"DBG_OUT_MSG",
+			"std::chrono::",
+			"double",
+			"timeInfo",
+			"rRawTime",
+			"HEATEROFF_SOCTHRESHOLD",
+			"m_rawCurTime",
+			"time.h",
+			"m_rawPrevTime",
+			");\n",
+			"m_rawPrevTime",
+			"m_rawPrevTim",
+			"TIMEOUTCOUNTERLIMIT",
+			"g_EVStateNInputVInterface",
+			"g_",
+			"m_lastTravelledDist",
+			"m_vmRowID",
+			"m_vmRecordID",
+			"BINARYLOCATION",
+			"else",
+			"stdio.h",
+			"Name",
+			"g_EVStateNInputVInterface",
+			"g_EVStateNUploaderInterface",
+			"else",
+			"generateErrorStr",
+			"generate",
+			"m_dateNtimeStr",
+			"vclmvmState",
+			"STATEFILESTRSIZE",
+			"|",
+			"fname",
+			"TIMESTRSIZE",
+			"curl",
+			"CURL",
+			"curl",
+			"	",
+			"gpioGet",
+			"m_pGPIO_rec2LdEn",
+			"m_pGPIO_rec1LdEn",
+			"gpioSet",
+			"init",
+			"gpio",
+			"m_pI2C_inputVMeter",
+			"m_pGPIO_heater",
+			"m_pI2C_fpga",
+			"m_pVS_evState"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"m_stateFileName",
+			"m_prev_driveFault",
+			"m_driveFault",
+			"false",
+			"true",
+			"float",
+			"rChronoTP_curTime",
+			"m_tp_curTime",
+			"ctime",
+			"STATEFILESTRSIZE",
+			"  ",
+			"m_pGPIO_batRelay",
+			"m_pGPIO_rec2PFM",
+			"m_pGPIO_rec1PFM",
+			"m_pGPIO_rec1LdEn",
+			"m_pGPIO_rec2LdEn",
+			"m_pGPIO_rec2PfEn",
+			"m_pGPIO_rec1PfEn",
+			"m_pGPIO_fpgaInterrupt",
+			"m_pI2C_inputVMeter",
+			"m_pGPIO_heater",
+			"m_pI2C_fpga",
+			"m_pVS_evState",
+			"g_EVStateNInputVInterface",
+			"DBG_ERR_MSG",
+			"VehicleState",
+			"EVStateHandler",
+			"  ",
+			"EVStateNInputVInterface",
+			"g_EVStateNInputVInterface",
+			"  ",
+			"Kevin Kyung Hwan Ra & Daniel Hyunsoo Lee",
+			"parsedStatusData",
+			"  ",
+			"Server",
+			"  ",
+			"null",
+			"BrokerPacket",
+			"BrokerPacket  ",
+			"  ",
+			"pwd",
+			"username",
+			"userName",
+			"mysqli_",
+			"  ",
+			"outFile",
+			"    ",
+			"markBlockFreed",
+			"markBlockAllocated"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": true,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "EVStateDependents.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8640,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2099,
+								2099
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 993.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "VehicleState.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 12603,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								12603,
+								12603
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2831.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "main.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1135,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1018,
+								1018
+							],
+							[
+								1086,
+								1086
+							]
+						],
+						"settings":
+						{
+							"auto_name": "<main>",
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 423.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 3,
+					"file": "EVStateDependents.hpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1144,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								729,
+								729
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 580.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "VehicleState.hpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1988,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								407,
+								407
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1302.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "InputVoltDependents.hpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 818,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								767,
+								767
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 530.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 6,
+					"file": "GPIOWrapper.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6500,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5685,
+								5685
+							]
+						],
+						"settings":
+						{
+							"history_list_is_closing": true,
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4554.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "EVStateNInputVInterface.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2205,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								255,
+								255
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1406.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "common.hpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1991,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1172,
+								1172
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 422.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "Makefile",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 727,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								292,
+								292
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Makefile/Makefile.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 12.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 10,
+					"file": "GPIOWrapper.hpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 938,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								712,
+								712
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "EVStateNInputVInterface.hpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 935,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								899,
+								899
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 450.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "To Impement",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 798,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								178,
+								178
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 252.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "notes",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 897,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								326,
+								326
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 13,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			],
+			[
+				0,
+				1,
+				1,
+				2
+			],
+			[
+				1,
+				1,
+				2,
+				2
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.5,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			0.5,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 100.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.sftp":
+	{
+		"height": 89.0
+	},
+	"project": "sm.sublime-project",
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 83.0,
+	"status_bar_visible": false,
+	"template_settings":
+	{
+	}
+}

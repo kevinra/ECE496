@@ -1,0 +1,25 @@
+To Impement:
+
+<BBB>
+error uploading feature
+I2CWrapper
+Test with InputVoltDependents.cpp
+electricity price & calculating input current
+
+If necessary
+  - device tree for GPIO/I2C
+
++Future Improvements+
+  SQLite write - make it asynchronous
+  BBB user pattern learning resistent to outliers
+  BBB quering website for electricity price (it's currently hard coded)
+  Website --> BBB user schedule notification/fetching
+
+
+<Server>
+
++Future Improvements+
+  Parsing a website to get electricity price from: 
+    <http://www.ontario-hydro.com/index.php?page=current_rates>
+
+  Program to communicate with BBB so that BBB does not need to spend time writing on server's disk. The program would simply reply with ACK to whatever BBB has sent immediately and file write operation will be done by this program.
