@@ -1,12 +1,6 @@
 ECE496
 ======
 
-University of Toronto ECE496 Project Codes
-
-include codes for:
+University of Toronto ECE496 Project Code
 
 C++ code for controlling Beaglebone Black (BBB)
-
-HTML/CSS/PHP code for server that communicates with BBB
-
-
