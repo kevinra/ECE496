@@ -1,4 +1,4 @@
-ECE496
+Smart On-Board Battery Charger and Thermal Management for a Canadian Electric Vehicle
 ======
 
 ####University of Toronto ECE496 Project Code
